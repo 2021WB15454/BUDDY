@@ -45,8 +45,8 @@ Deploy your BUDDY AI assistant across all your devices with this comprehensive i
 # Download from https://nodejs.org
 
 # 3. Clone BUDDY repository
-git clone https://github.com/your-repo/buddy.git
-cd buddy
+git clone https://github.com/2021WB15454/BUDDY.git
+cd BUDDY
 
 # 4. Install dependencies
 pip install -r packages/core/requirements.txt
@@ -76,8 +76,8 @@ npm run dev
 brew install python@3.11 node@18 git
 
 # 3. Clone and setup BUDDY
-git clone https://github.com/your-repo/buddy.git
-cd buddy
+git clone https://github.com/2021WB15454/BUDDY.git
+cd BUDDY
 
 # 4. Install Python dependencies
 python3.11 -m pip install -r packages/core/requirements.txt
@@ -102,8 +102,8 @@ sudo apt update && sudo apt upgrade -y
 sudo apt install python3.11 python3.11-pip nodejs npm git portaudio19-dev python3-pyaudio
 
 # 3. Clone BUDDY
-git clone https://github.com/your-repo/buddy.git
-cd buddy
+git clone https://github.com/2021WB15454/BUDDY.git
+cd BUDDY
 
 # 4. Install Python dependencies
 pip3.11 install -r packages/core/requirements.txt
@@ -146,7 +146,7 @@ export PATH="$PATH:`pwd`/flutter/bin"
 # Download from https://developer.android.com/studio
 
 # 3. Build BUDDY mobile app
-cd buddy/apps/mobile
+cd BUDDY/apps/mobile
 flutter doctor  # Check setup
 flutter build apk --release
 
@@ -157,7 +157,7 @@ flutter install
 #### Option 2: Direct APK Installation
 ```bash
 # 1. Download BUDDY APK from releases
-wget https://github.com/your-repo/buddy/releases/latest/buddy-android.apk
+wget https://github.com/2021WB15454/BUDDY/releases/latest/buddy-android.apk
 
 # 2. Enable "Unknown Sources" in Android Settings
 # Settings → Security → Unknown Sources
@@ -179,7 +179,7 @@ flutter doctor --android-licenses
 flutter doctor
 
 # 2. Build iOS app
-cd buddy/apps/mobile
+cd BUDDY/apps/mobile
 flutter build ios --release
 
 # 3. Open in Xcode and deploy
@@ -214,7 +214,7 @@ adb shell am start -n com.buddy.tv/.MainActivity
 
 ```bash
 # 1. Build tvOS app (requires macOS + Xcode)
-cd buddy/apps/tv
+cd BUDDY/apps/tv
 xcodebuild -workspace BuddyTV.xcworkspace -scheme BuddyTV -destination 'platform=tvOS,name=Apple TV'
 
 # 2. Install via Xcode or TestFlight
@@ -228,7 +228,7 @@ xcodebuild -workspace BuddyTV.xcworkspace -scheme BuddyTV -destination 'platform
 # Download from https://developer.samsung.com/tizen
 
 # 2. Build Tizen app
-cd buddy/apps/tv/tizen
+cd BUDDY/apps/tv/tizen
 tizen build-web
 
 # 3. Install on TV
@@ -260,7 +260,7 @@ adb install buddy-wear.apk
 
 ```bash
 # 1. Build watchOS app (requires Xcode)
-cd buddy/apps/watch
+cd BUDDY/apps/watch
 xcodebuild -workspace BuddyWatch.xcworkspace -scheme BuddyWatch
 
 # 2. Install via iPhone (paired watch required)
@@ -320,8 +320,8 @@ sudo apt update && sudo apt upgrade -y
 sudo apt install python3.11 python3.11-pip git docker.io portaudio19-dev
 
 # 5. Clone BUDDY
-git clone https://github.com/your-repo/buddy.git
-cd buddy
+git clone https://github.com/2021WB15454/BUDDY.git
+cd BUDDY
 
 # 6. Install BUDDY
 pip3.11 install -r packages/core/requirements.txt
@@ -469,8 +469,8 @@ if (!(Get-Command python -ErrorAction SilentlyContinue)) {
 
 # Clone repository
 Write-Host "📥 Cloning BUDDY repository..." -ForegroundColor Blue
-git clone https://github.com/your-repo/buddy.git
-cd buddy
+git clone https://github.com/2021WB15454/BUDDY.git
+cd BUDDY
 
 # Install dependencies
 Write-Host "📦 Installing Python dependencies..." -ForegroundColor Blue
@@ -517,8 +517,8 @@ sudo apt install -y python3.11 python3.11-pip nodejs npm git portaudio19-dev pyt
 
 # Clone repository
 echo "📥 Cloning BUDDY repository..."
-git clone https://github.com/your-repo/buddy.git
-cd buddy
+git clone https://github.com/2021WB15454/BUDDY.git
+cd BUDDY
 
 # Install Python dependencies
 echo "📦 Installing Python dependencies..."
@@ -626,7 +626,7 @@ speaker-test -t wav -c 2
 ## 📞 Support
 
 - **Documentation**: [docs/](docs/)
-- **Issues**: [GitHub Issues](https://github.com/your-repo/buddy/issues)
+- **Issues**: [GitHub Issues](https://github.com/2021WB15454/BUDDY/issues)
 - **Community**: [Discord Server](https://discord.gg/buddy)
 - **Email**: support@buddy-ai.com
 
