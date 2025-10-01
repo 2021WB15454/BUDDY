@@ -1,4 +1,44 @@
+# BUDDY AI Assistant - .gitignore
+# =====================================
+
+# Operating System Files
+# -----------------------
+# Windows
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.AppleDB
+.AppleDesktop
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
 # Python
+# -------
 __pycache__/
 *.py[cod]
 *$py.class
@@ -22,7 +62,31 @@ share/python-wheels/
 *.egg
 MANIFEST
 
-# Virtual environments
+# PyInstaller
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+cover/
+
+# Virtual Environments
+# --------------------
 .env
 .venv
 env/
@@ -30,20 +94,15 @@ venv/
 ENV/
 env.bak/
 venv.bak/
-.vscode/
 
 # Node.js
+# -------
 node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
 .pnpm-debug.log*
-
-# Package managers
-package-lock.json
-yarn.lock
-pnpm-lock.yaml
 
 # Runtime data
 pids
@@ -73,9 +132,6 @@ build/Release
 # Dependency directories
 jspm_packages/
 
-# Snowpack dependency directory
-web_modules/
-
 # TypeScript cache
 *.tsbuildinfo
 
@@ -102,12 +158,6 @@ web_modules/
 
 # Yarn Integrity file
 .yarn-integrity
-
-# dotenv environment variable files
-.env.development.local
-.env.test.local
-.env.production.local
-.env.local
 
 # parcel-bundler cache
 .cache
@@ -150,72 +200,264 @@ public
 .yarn/install-state.gz
 .pnp.*
 
-# IDEs
+# Flutter/Dart
+# -------------
+**/android/**/gradle-wrapper.jar
+**/android/.gradle
+**/android/captures/
+**/android/gradlew
+**/android/gradlew.bat
+**/android/local.properties
+**/android/**/GeneratedPluginRegistrant.java
+
+# iOS/XCode
+**/ios/**/*.mode1v3
+**/ios/**/*.mode2v3
+**/ios/**/*.moved-aside
+**/ios/**/*.pbxuser
+**/ios/**/*.perspectivev3
+**/ios/**/*sync/
+**/ios/**/.sconsign.dblite
+**/ios/**/.tags*
+**/ios/**/.vagrant/
+**/ios/**/DerivedData/
+**/ios/**/Icon?
+**/ios/**/Pods/
+**/ios/**/.symlinks/
+**/ios/**/profile
+**/ios/**/xcuserdata
+**/ios/.generated/
+**/ios/Flutter/.last_build_id
+**/ios/Flutter/App.framework
+**/ios/Flutter/Flutter.framework
+**/ios/Flutter/Flutter.podspec
+**/ios/Flutter/Generated.xcconfig
+**/ios/Flutter/ephemeral/
+**/ios/Flutter/app.flx
+**/ios/Flutter/app.zip
+**/ios/Flutter/flutter_assets/
+**/ios/Flutter/flutter_export_environment.sh
+**/ios/ServiceDefinitions.json
+**/ios/Runner/GeneratedPluginRegistrant.*
+
+# Web
+**/web/packages/
+**/web/.packages
+**/web/pubspec.lock
+**/web/.dart_tool/
+
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.buildlog/
+.history
+.svn/
+migrate_working_dir/
+
+# IntelliJ related
+*.iml
+*.ipr
+*.iws
 .idea/
+
+# The .vscode folder contains launch configuration and tasks you configure in
+# VS Code which you may wish to be included in version control, so this line
+# is commented out by default.
+#.vscode/
+
+# Flutter/Dart/Pub related
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+build/
+
+# Docker
+# ------
+.dockerignore
+docker-compose.override.yml
+
+# Database Files
+# --------------
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs
+# ----
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# Audio/Video Files (temporary)
+# -----------------------------
+*.wav
+*.mp3
+*.mp4
+*.avi
+*.mov
+temp_audio_*
+
+# Configuration Files (sensitive)
+# --------------------------------
+.env.local
+.env.production
+.env.development
+config/secrets.json
+config/api_keys.json
+
+# BUDDY Specific
+# --------------
+# User data and conversations
+data/conversations/
+data/user_profiles/
+data/audio_cache/
+
+# Model files (too large for git)
+models/*.bin
+models/*.pt
+models/*.h5
+models/*.pkl
+
+# Generated files
+packages/core/buddy/generated/
+apps/desktop/dist/
+apps/mobile/build/
+
+# Deployment artifacts
+dist/
+*.apk
+*.ipa
+*.dmg
+*.exe
+*.msi
+*.deb
+*.rpm
+
+# Backup files
+*.backup
+*.bak
+*~
+
+# IDE and Editor files
+# --------------------
+.vscode/settings.json
+.vscode/launch.json
+.vscode/tasks.json
+*.sublime-project
+*.sublime-workspace
+
+# JetBrains IDEs
+.idea/
+*.iws
+*.iml
+*.ipr
+
+# Vim
 *.swp
 *.swo
 *~
 
-# OS
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
-
-# Logs
-logs
-*.log
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
 
 # Temporary files
+# ---------------
 tmp/
 temp/
+*.tmp
+*.temp
 
-# Database
-*.db
-*.sqlite
+# System and process files
+# ------------------------
+.pid
+*.pid
+*.seed
+*.pid.lock
 
-# Application specific
-.buddy/
-data/
-logs/
-models/cache/
+# Coverage reports
+# ----------------
+coverage/
+.coverage
+htmlcov/
 
-# Flutter/Dart
-# Files and directories created by pub
-.dart_tool/
-.packages
-build/
-.flutter-plugins
-.flutter-plugins-dependencies
-.pub-cache/
-.pub/
+# Documentation build
+# -------------------
+docs/_build/
+site/
 
-# Web related
-lib/generated_plugin_registrant.dart
+# Jupyter Notebook
+# ----------------
+.ipynb_checkpoints
 
-# Symbolication related
-app.*.symbols
+# pyenv
+# -----
+.python-version
 
-# Obfuscation related
-app.*.map.json
+# pipenv
+# ------
+Pipfile.lock
 
-# Android Studio will place build artifacts here
-/android/app/debug
-/android/app/profile
-/android/app/release
+# Poetry
+# ------
+poetry.lock
 
-# iOS
-ios/Flutter/Generated.xcconfig
-ios/Runner/GeneratedPluginRegistrant.h
-ios/Runner/GeneratedPluginRegistrant.m
+# Celery
+# ------
+celerybeat-schedule
+celerybeat.pid
 
-# Docker
-.dockerignore
+# SageMath parsed files
+# ---------------------
+*.sage.py
 
-# Backup files
-*.bak
-*.backup
-*.old
+# Spyder project settings
+# -----------------------
+.spyderproject
+.spyproject
+
+# Rope project settings
+# ---------------------
+.ropeproject
+
+# mkdocs documentation
+# --------------------
+/site
+
+# mypy
+# ----
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+# -----------------
+.pyre/
+
+# pytype static type analyzer
+# ---------------------------
+.pytype/
+
+# Cython debug symbols
+# --------------------
+cython_debug/
+
+# End of .gitignore

@@ -1,0 +1,28 @@
+{
+  "recommendations": [
+    "ms-python.python",
+    "ms-python.black-formatter",
+    "ms-python.pylint",
+    "ms-toolsai.jupyter",
+    "bradlc.vscode-tailwindcss",
+    "esbenp.prettier-vscode",
+    "ms-vscode.vscode-typescript-next",
+    "dart-code.dart-code",
+    "dart-code.flutter",
+    "ms-vscode-remote.remote-containers",
+    "ms-vscode.makefile-tools",
+    "redhat.vscode-yaml",
+    "ms-vscode.vscode-json",
+    "github.copilot",
+    "github.copilot-chat",
+    "ms-vscode.test-adapter-converter",
+    "hbenl.vscode-test-explorer",
+    "ms-vscode.vscode-json",
+    "ms-vscode.cmake-tools",
+    "twxs.cmake",
+    "formulahendry.auto-rename-tag",
+    "christian-kohler.path-intellisense",
+    "ms-vscode.vscode-json",
+    "streetsidesoftware.code-spell-checker"
+  ]
+}
