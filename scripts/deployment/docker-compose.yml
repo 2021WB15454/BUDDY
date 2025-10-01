@@ -1,0 +1,223 @@
+version: '3.8'
+
+services:
+  # BUDDY Core Service
+  buddy-core:
+    build:
+      context: ../..
+      dockerfile: docker/Dockerfile
+    container_name: buddy-core
+    ports:
+      - "8000:8000"
+    environment:
+      - BUDDY_ENV=production
+      - BUDDY_HOST=0.0.0.0
+      - BUDDY_PORT=8000
+      - BUDDY_LOG_LEVEL=info
+    volumes:
+      - buddy-data:/app/data
+      - buddy-logs:/app/logs
+      - buddy-models:/app/models
+      # Mount audio devices for voice input
+      - /dev/snd:/dev/snd:ro
+    devices:
+      - /dev/snd
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - buddy-network
+
+  # BUDDY Desktop Web Interface
+  buddy-desktop:
+    build:
+      context: ../../apps/desktop
+      dockerfile: Dockerfile.web
+    container_name: buddy-desktop
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - REACT_APP_BUDDY_API_URL=http://buddy-core:8000
+      - REACT_APP_BUDDY_WS_URL=ws://buddy-core:8000/ws
+    depends_on:
+      buddy-core:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - buddy-network
+
+  # Redis for caching and session management
+  redis:
+    image: redis:7-alpine
+    container_name: buddy-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - buddy-redis-data:/data
+    restart: unless-stopped
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    networks:
+      - buddy-network
+
+  # PostgreSQL for conversation history and user data
+  postgres:
+    image: postgres:15-alpine
+    container_name: buddy-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=buddy
+      - POSTGRES_USER=buddy
+      - POSTGRES_PASSWORD=buddy_secure_password_123
+      - POSTGRES_INITDB_ARGS=--encoding=UTF-8
+    volumes:
+      - buddy-postgres-data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U buddy"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - buddy-network
+
+  # Nginx reverse proxy and load balancer
+  nginx:
+    image: nginx:alpine
+    container_name: buddy-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+      - buddy-nginx-logs:/var/log/nginx
+    depends_on:
+      - buddy-core
+      - buddy-desktop
+    restart: unless-stopped
+    networks:
+      - buddy-network
+
+  # Grafana for monitoring and analytics
+  grafana:
+    image: grafana/grafana:latest
+    container_name: buddy-grafana
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=buddy_admin_123
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - buddy-grafana-data:/var/lib/grafana
+      - ./grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./grafana/datasources:/etc/grafana/provisioning/datasources
+    restart: unless-stopped
+    networks:
+      - buddy-network
+
+  # Prometheus for metrics collection
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: buddy-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - buddy-prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=30d'
+      - '--web.enable-lifecycle'
+    restart: unless-stopped
+    networks:
+      - buddy-network
+
+  # Node Exporter for system metrics
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: buddy-node-exporter
+    ports:
+      - "9100:9100"
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.rootfs=/rootfs'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    restart: unless-stopped
+    networks:
+      - buddy-network
+
+  # Watchtower for automatic updates
+  watchtower:
+    image: containrrr/watchtower
+    container_name: buddy-watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - WATCHTOWER_CLEANUP=true
+      - WATCHTOWER_POLL_INTERVAL=3600
+      - WATCHTOWER_INCLUDE_STOPPED=true
+      - WATCHTOWER_NOTIFICATIONS=email
+      - WATCHTOWER_NOTIFICATION_EMAIL_FROM=buddy@yourdomain.com
+      - WATCHTOWER_NOTIFICATION_EMAIL_TO=admin@yourdomain.com
+    restart: unless-stopped
+    networks:
+      - buddy-network
+
+  # Backup service
+  backup:
+    image: postgres:15-alpine
+    container_name: buddy-backup
+    volumes:
+      - buddy-postgres-data:/var/lib/postgresql/data:ro
+      - ./backups:/backups
+      - ./backup-script.sh:/backup-script.sh:ro
+    environment:
+      - POSTGRES_DB=buddy
+      - POSTGRES_USER=buddy
+      - POSTGRES_PASSWORD=buddy_secure_password_123
+    command: /bin/sh -c "chmod +x /backup-script.sh && crond -f"
+    restart: unless-stopped
+    depends_on:
+      - postgres
+    networks:
+      - buddy-network
+
+networks:
+  buddy-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
+volumes:
+  buddy-data:
+    driver: local
+  buddy-logs:
+    driver: local
+  buddy-models:
+    driver: local
+  buddy-redis-data:
+    driver: local
+  buddy-postgres-data:
+    driver: local
+  buddy-grafana-data:
+    driver: local
+  buddy-prometheus-data:
+    driver: local
+  buddy-nginx-logs:
+    driver: local

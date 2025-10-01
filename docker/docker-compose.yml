@@ -1,0 +1,186 @@
+version: '3.8'
+
+services:
+  # BUDDY Core Backend
+  buddy-backend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+      target: production
+    image: buddy/backend:latest
+    container_name: buddy-backend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - BUDDY_DATA_DIR=/app/data
+      - BUDDY_LOG_LEVEL=INFO
+      - BUDDY_HOST=0.0.0.0
+      - BUDDY_PORT=8000
+      - BUDDY_ENABLE_HEALTH_MONITORING=true
+      - BUDDY_SYNC_ENABLED=true
+      - BUDDY_VOICE_ENABLED=true
+    volumes:
+      - buddy_data:/app/data
+      - buddy_models:/app/models
+      - buddy_logs:/app/data/logs
+    networks:
+      - buddy_network
+    healthcheck:
+      test: ["CMD", "python", "/app/healthcheck.py"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: '1.0'
+        reservations:
+          memory: 512M
+          cpus: '0.25'
+
+  # BUDDY Home Assistant Integration (Optional)
+  buddy-homeassistant:
+    image: homeassistant/home-assistant:latest
+    container_name: buddy-homeassistant
+    restart: unless-stopped
+    ports:
+      - "8123:8123"
+    environment:
+      - TZ=UTC
+    volumes:
+      - homeassistant_config:/config
+      - /etc/localtime:/etc/localtime:ro
+    networks:
+      - buddy_network
+    depends_on:
+      - buddy-backend
+    profiles:
+      - homeassistant
+
+  # BUDDY Web Interface (Optional)
+  buddy-web:
+    build:
+      context: ./apps/web
+      dockerfile: Dockerfile
+    image: buddy/web:latest
+    container_name: buddy-web
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - REACT_APP_BUDDY_API_URL=http://localhost:8000
+      - REACT_APP_BUDDY_WS_URL=ws://localhost:8000/ws
+    networks:
+      - buddy_network
+    depends_on:
+      - buddy-backend
+    profiles:
+      - web
+
+  # Redis for caching and pub/sub (Optional)
+  buddy-redis:
+    image: redis:7-alpine
+    container_name: buddy-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - buddy_redis:/data
+    networks:
+      - buddy_network
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    profiles:
+      - cache
+
+  # Nginx reverse proxy (Optional)
+  buddy-nginx:
+    image: nginx:alpine
+    container_name: buddy-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./docker/nginx.conf:/etc/nginx/nginx.conf:ro
+      - buddy_certs:/etc/nginx/certs
+    networks:
+      - buddy_network
+    depends_on:
+      - buddy-backend
+    profiles:
+      - proxy
+
+  # Prometheus monitoring (Optional)
+  buddy-prometheus:
+    image: prom/prometheus:latest
+    container_name: buddy-prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./docker/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - buddy_prometheus:/prometheus
+    networks:
+      - buddy_network
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    profiles:
+      - monitoring
+
+  # Grafana dashboards (Optional)
+  buddy-grafana:
+    image: grafana/grafana:latest
+    container_name: buddy-grafana
+    restart: unless-stopped
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=buddy_admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - buddy_grafana:/var/lib/grafana
+      - ./docker/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./docker/grafana/datasources:/etc/grafana/provisioning/datasources:ro
+    networks:
+      - buddy_network
+    depends_on:
+      - buddy-prometheus
+    profiles:
+      - monitoring
+
+networks:
+  buddy_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
+volumes:
+  buddy_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./data
+  buddy_models:
+    driver: local
+  buddy_logs:
+    driver: local
+  buddy_redis:
+    driver: local
+  buddy_certs:
+    driver: local
+  buddy_prometheus:
+    driver: local
+  buddy_grafana:
+    driver: local
+  homeassistant_config:
+    driver: local

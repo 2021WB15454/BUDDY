@@ -1,0 +1,3017 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#2c3e50">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="BUDDY AI">
+    <meta name="description" content="BUDDY - Your Personal AI Assistant with voice commands, smart skills, and cross-device connectivity">
+    <link rel="manifest" href="/static/manifest.json">
+    <link rel="icon" type="image/png" sizes="192x192" href="/static/icon-192.png">
+    <link rel="apple-touch-icon" href="/static/icon-192.png">
+    <title>BUDDY - Personal AI Assistant</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .container {
+            display: flex;
+            height: 100vh;
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar {
+            width: 300px;
+            background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            border-radius: 20px 0 0 20px;
+        }
+
+        .sidebar-header {
+            padding: 30px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+        }
+
+        .logo {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            opacity: 0.8;
+            font-size: 0.9em;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 20px;
+            padding: 15px;
+            background: rgba(46, 204, 113, 0.2);
+            border-radius: 10px;
+            border: 1px solid #2ecc71;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            background: #2ecc71;
+            border-radius: 50%;
+            margin-right: 10px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .nav-menu {
+            flex: 1;
+            padding: 20px 0;
+        }
+
+        .nav-item {
+            padding: 15px 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            background: rgba(255, 255, 255, 0.1);
+            border-left-color: #3498db;
+        }
+
+        .nav-item i {
+            margin-right: 10px;
+            width: 20px;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .header {
+            padding: 20px 30px;
+            background: white;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: between;
+            align-items: center;
+        }
+
+        .header h1 {
+            color: #2c3e50;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+        }
+
+        .btn-voice {
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+            color: white;
+        }
+
+        .btn-voice:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(231, 76, 60, 0.4);
+        }
+
+        .btn-voice.recording {
+            animation: pulse-red 1s infinite;
+        }
+
+        @keyframes pulse-red {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background: #f8f9fa;
+        }
+
+        .messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .message {
+            max-width: 70%;
+            padding: 15px 20px;
+            border-radius: 20px;
+            position: relative;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message.user {
+            align-self: flex-end;
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            color: white;
+            border-bottom-right-radius: 5px;
+        }
+
+        .message.buddy {
+            align-self: flex-start;
+            background: white;
+            border: 1px solid #eee;
+            border-bottom-left-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .message-header {
+            font-size: 0.8em;
+            opacity: 0.7;
+            margin-bottom: 5px;
+        }
+
+        .message-content {
+            line-height: 1.4;
+        }
+
+        .typing-indicator {
+            display: none;
+            align-self: flex-start;
+            padding: 15px 20px;
+            background: white;
+            border-radius: 20px;
+            border-bottom-left-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: #666;
+            border-radius: 50%;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-10px); }
+        }
+
+        .input-area {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #eee;
+        }
+
+        .input-container {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            background: #f8f9fa;
+            border-radius: 25px;
+            padding: 10px 20px;
+            border: 2px solid transparent;
+            transition: border-color 0.3s ease;
+        }
+
+        .input-container:focus-within {
+            border-color: #3498db;
+        }
+
+        .message-input {
+            flex: 1;
+            border: none;
+            background: none;
+            font-size: 16px;
+            outline: none;
+            padding: 10px 0;
+        }
+
+        .voice-visualizer {
+            display: none;
+            margin: 20px;
+            padding: 20px;
+            background: rgba(231, 76, 60, 0.1);
+            border-radius: 15px;
+            text-align: center;
+        }
+
+        .voice-visualizer.active {
+            display: block;
+        }
+
+        .voice-waves {
+            display: flex;
+            justify-content: center;
+            gap: 3px;
+            margin: 10px 0;
+        }
+
+        .voice-wave {
+            width: 4px;
+            height: 20px;
+            background: #e74c3c;
+            border-radius: 2px;
+            animation: wave 1s infinite;
+        }
+
+        .voice-wave:nth-child(2) { animation-delay: 0.1s; }
+        .voice-wave:nth-child(3) { animation-delay: 0.2s; }
+        .voice-wave:nth-child(4) { animation-delay: 0.3s; }
+        .voice-wave:nth-child(5) { animation-delay: 0.4s; }
+
+        @keyframes wave {
+            0%, 100% { height: 20px; }
+            50% { height: 40px; }
+        }
+
+        .skills-panel {
+            position: absolute;
+            top: 0;
+            right: -350px;
+            width: 350px;
+            height: 100%;
+            background: white;
+            box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+            transition: right 0.3s ease;
+            overflow-y: auto;
+        }
+
+        .skills-panel.open {
+            right: 0;
+        }
+
+        .skills-header {
+            padding: 20px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #eee;
+        }
+
+        .skill-item {
+            padding: 15px 20px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .skill-item:hover {
+            background: #f8f9fa;
+        }
+
+        .skill-name {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .skill-description {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        /* Enhanced mobile features */
+        .mobile-toolbar {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid #eee;
+            padding: 10px;
+            z-index: 1000;
+        }
+
+        .mobile-toolbar.show {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+        }
+
+        .mobile-action-btn {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 20px;
+            background: #f8f9fa;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.9em;
+        }
+
+        .mobile-action-btn.active {
+            background: #3498db;
+            color: white;
+        }
+
+        .connection-status {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.7em;
+            font-weight: 500;
+            z-index: 1001;
+        }
+
+        .connection-status.online {
+            background: #2ecc71;
+            color: white;
+        }
+
+        .connection-status.offline {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .connection-status.connecting {
+            background: #f39c12;
+            color: white;
+        }
+
+        /* Loading spinner */
+        .loading-spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Scroll to bottom button */
+        .scroll-to-bottom {
+            position: absolute;
+            bottom: 80px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #3498db;
+            color: white;
+            border: none;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            z-index: 100;
+        }
+
+        .scroll-to-bottom.show {
+            display: flex;
+        }
+
+        /* Enhanced animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in-up {
+            animation: fadeInUp 0.4s ease-out;
+        }
+
+        /* Voice response visual feedback */
+        .voice-response-indicator {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            z-index: 2000;
+            display: none;
+            text-align: center;
+        }
+
+        .voice-response-indicator.show {
+            display: block;
+            animation: fadeInUp 0.3s ease-out;
+        }
+
+        /* Quick action buttons */
+        .quick-actions {
+            display: flex;
+            gap: 8px;
+            margin: 10px 0;
+            flex-wrap: wrap;
+        }
+
+        .quick-action {
+            padding: 6px 12px;
+            border: 1px solid #ddd;
+            border-radius: 15px;
+            background: white;
+            color: #666;
+            cursor: pointer;
+            font-size: 0.8em;
+            transition: all 0.2s ease;
+        }
+
+        .quick-action:hover {
+            background: #3498db;
+            color: white;
+            border-color: #3498db;
+        }
+
+        /* View System Styles */
+        .view-content {
+            flex: 1;
+            display: none;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .view-content.active {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Voice Interface Styles */
+        .voice-interface {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .voice-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .voice-header h2 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .voice-status {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .status-card {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .status-card h3 {
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 10px;
+        }
+
+        .status-card div {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .voice-commands {
+            margin-bottom: 30px;
+        }
+
+        .command-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .command-item {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .command-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .command-item i {
+            font-size: 1.5em;
+        }
+
+        .voice-settings {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .setting-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .setting-row:last-child {
+            border-bottom: none;
+        }
+
+        /* Skills Interface Styles */
+        .skills-interface {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .skills-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .skills-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .skill-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .skill-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .skill-card h3 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .skill-card p {
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        .skill-version {
+            font-size: 0.8em;
+            color: #999;
+        }
+
+        /* Memory Interface Styles */
+        .memory-interface {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .memory-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .memory-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .stat-card h3 {
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 10px;
+        }
+
+        .stat-card div {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .memory-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        .memory-section {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .memory-section h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+
+        /* Settings Interface Styles */
+        .settings-interface {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .settings-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .settings-groups {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .settings-group {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .settings-group h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #f8f9fa;
+            padding-bottom: 10px;
+        }
+
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid #f8f9fa;
+        }
+
+        .setting-item:last-child {
+            border-bottom: none;
+        }
+
+        .setting-item label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+        }
+
+        .setting-item input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+        }
+
+        .setting-item input[type="range"] {
+            width: 150px;
+            margin: 0 10px;
+        }
+
+        .setting-item select {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: white;
+        }
+
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #f8f9fa;
+        }
+
+        .info-item:last-child {
+            border-bottom: none;
+        }
+
+        .status-online {
+            color: #2ecc71;
+            font-weight: bold;
+        }
+
+
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                height: auto;
+                border-radius: 0;
+            }
+            
+            .nav-menu {
+                display: flex;
+                overflow-x: auto;
+                padding: 10px 0;
+            }
+            
+            .nav-item {
+                white-space: nowrap;
+                min-width: 120px;
+                text-align: center;
+            }
+        }
+
+        /* Add smooth view transitions */
+        .view-content {
+            transition: opacity 0.3s ease-in-out;
+            opacity: 0;
+            display: none;
+        }
+
+        .view-content.active {
+            opacity: 1;
+            display: block;
+        }
+
+        /* Dark mode theme */
+        body.dark-mode {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            color: #e0e6ed;
+        }
+
+        body.dark-mode .container {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid #333;
+        }
+
+        body.dark-mode .nav-item {
+            color: #b8c5d1;
+            border-bottom-color: #333;
+        }
+
+        body.dark-mode .nav-item.active {
+            color: #64b5f6;
+            border-bottom-color: #64b5f6;
+        }
+
+        body.dark-mode .status-card,
+        body.dark-mode .skill-card,
+        body.dark-mode .memory-stat,
+        body.dark-mode .settings-group {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: #333;
+        }
+
+        body.dark-mode .chat-message.user {
+            background: #1976d2;
+        }
+
+        body.dark-mode .chat-message.assistant {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        body.dark-mode input, body.dark-mode select, body.dark-mode textarea {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: #444;
+            color: #e0e6ed;
+        }
+
+        body.dark-mode button {
+            background: #1976d2;
+            border-color: #1565c0;
+        }
+
+        body.dark-mode .voice-status.listening {
+            background: #2e7d32;
+        }
+
+        /* Responsive improvements */
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                padding: 15px;
+            }
+
+            .nav-container {
+                padding: 10px;
+            }
+
+            .skills-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .memory-stats {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Connection Status Indicator -->
+        <div class="connection-status connecting" id="connectionStatus">Connecting...</div>
+        
+        <!-- Voice Response Indicator -->
+        <div class="voice-response-indicator" id="voiceResponseIndicator">
+            <div>🎤 Processing voice...</div>
+            <div class="loading-spinner"></div>
+        </div>
+
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">🤖</div>
+                <div class="subtitle">BUDDY AI Assistant</div>
+            </div>
+            
+            <div class="status-indicator">
+                <div class="status-dot"></div>
+                <span>Connected & Ready</span>
+            </div>
+            
+            <div class="nav-menu">
+                <div class="nav-item active" data-view="chat" tabindex="0" role="button" aria-label="Chat interface">
+                    <i>💬</i> Chat
+                </div>
+                <div class="nav-item" data-view="voice" tabindex="0" role="button" aria-label="Voice commands">
+                    <i>🎤</i> Voice
+                </div>
+                <div class="nav-item" data-view="skills" tabindex="0" role="button" aria-label="Available skills">
+                    <i>⚡</i> Skills
+                </div>
+                <div class="nav-item" data-view="memory" tabindex="0" role="button" aria-label="Memory and history">
+                    <i>🧠</i> Memory
+                </div>
+                <div class="nav-item" data-view="settings" tabindex="0" role="button" aria-label="Settings">
+                    <i>⚙️</i> Settings
+                </div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="header">
+                <h1 id="pageTitle">Chat Interface</h1>
+                <div class="controls">
+                    <button class="btn btn-primary" onclick="toggleSkills()" aria-label="Toggle skills panel" tabindex="0">
+                        <i>⚡</i> Skills
+                    </button>
+                    <button class="btn btn-voice" onclick="toggleVoice()" id="voiceBtn" aria-label="Start voice recording" tabindex="0">
+                        <i>🎤</i> Voice
+                    </button>
+                    <button class="btn btn-primary" onclick="exportConversation()" aria-label="Export conversation" tabindex="0" style="display:none" id="exportBtn">
+                        <i>📤</i> Export
+                    </button>
+                </div>
+            </div>
+
+            <!-- Chat View -->
+            <div id="chatView" class="view-content active">
+                <div class="chat-container">
+                <div class="voice-visualizer" id="voiceVisualizer">
+                    <div>🎤 Listening...</div>
+                    <div class="voice-waves">
+                        <div class="voice-wave"></div>
+                        <div class="voice-wave"></div>
+                        <div class="voice-wave"></div>
+                        <div class="voice-wave"></div>
+                        <div class="voice-wave"></div>
+                    </div>
+                    <div>Speak your message to BUDDY</div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="quick-actions" id="quickActions" style="display:none;">
+                    <button class="quick-action" onclick="sendQuickMessage('What can you do?')">Help</button>
+                    <button class="quick-action" onclick="sendQuickMessage('What\'s the weather?')">Weather</button>
+                    <button class="quick-action" onclick="sendQuickMessage('Set a timer for 5 minutes')">Timer</button>
+                    <button class="quick-action" onclick="sendQuickMessage('Create a note')">Note</button>
+                    <button class="quick-action" onclick="clearConversation()">Clear</button>
+                </div>
+
+                <div class="messages" id="messages" role="log" aria-live="polite" aria-label="Conversation messages">
+                    <div class="message buddy fade-in-up">
+                        <div class="message-header">BUDDY • Just now</div>
+                        <div class="message-content">
+                            Hello! I'm BUDDY, your personal AI assistant. I'm ready to help you with various tasks including:
+                            <br><br>
+                            🎤 Voice commands and conversations<br>
+                            📝 Note taking and reminders<br>
+                            🌤️ Weather information<br>
+                            🧮 Calculations and timers<br>
+                            🔍 Information lookup<br>
+                            <br>
+                            How can I assist you today?
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Scroll to bottom button -->
+                <button class="scroll-to-bottom" id="scrollToBottom" onclick="scrollToBottom()" aria-label="Scroll to bottom">
+                    ↓
+                </button>
+
+                <div class="typing-indicator" id="typingIndicator">
+                    <div class="typing-dots">
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                    </div>
+                </div>
+
+                <div class="input-area">
+                    <div class="input-container">
+                        <input 
+                            type="text" 
+                            class="message-input" 
+                            id="messageInput" 
+                            placeholder="Type your message to BUDDY..." 
+                            autocomplete="off"
+                            aria-label="Message input"
+                            maxlength="1000"
+                        >
+                        <button class="btn btn-primary" onclick="sendMessage()" aria-label="Send message" tabindex="0">
+                            <i>📤</i>
+                            <span class="loading-spinner" id="sendSpinner"></span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            </div>
+
+            <!-- Voice View -->
+            <div id="voiceView" class="view-content">
+                <div class="voice-interface">
+                    <div class="voice-header">
+                        <h2>🎤 BUDDY Voice Recognition</h2>
+                        <p>Advanced voice commands </p>
+                    </div>
+                    
+                    <div class="voice-status">
+                        <div class="status-card">
+                            <h3>Voice Pipeline Status</h3>
+                            <div id="voicePipelineStatus">Initializing...</div>
+                        </div>
+                        <div class="status-card">
+                            <h3>Recognition Accuracy</h3>
+                            <div id="recognitionAccuracy">95%</div>
+                        </div>
+                        <div class="status-card">
+                            <h3>Response Time</h3>
+                            <div id="responseTime">< 300ms</div>
+                        </div>
+                    </div>
+
+                    <div class="voice-commands">
+                        <h3>Voice Commands</h3>
+                        <div class="command-grid">
+                            <div class="command-item" onclick="testVoiceCommand('Hey BUDDY, what can you do?')">
+                                <i>💬</i>
+                                <span>"Hey BUDDY, what can you do?"</span>
+                            </div>
+                            <div class="command-item" onclick="testVoiceCommand('Set a reminder for 3 PM')">
+                                <i>⏰</i>
+                                <span>"Set a reminder for 3 PM"</span>
+                            </div>
+                            <div class="command-item" onclick="testVoiceCommand('What\'s the weather today?')">
+                                <i>🌤️</i>
+                                <span>"What's the weather today?"</span>
+                            </div>
+                            <div class="command-item" onclick="testVoiceCommand('Start a 25-minute timer')">
+                                <i>⏱️</i>
+                                <span>"Start a 25-minute timer"</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="voice-settings">
+                        <h3>Voice Settings</h3>
+                        <div class="setting-row">
+                            <label>Wake Words:</label>
+                            <span id="wakeWordsDisplay">hey buddy, buddy, hi buddy</span>
+                        </div>
+                        <div class="setting-row">
+                            <label>Voice Model:</label>
+                            <span>Whisper Small</span>
+                        </div>
+                        <div class="setting-row">
+                            <label>Language:</label>
+                            <span>English (US)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Skills View -->
+            <div id="skillsView" class="view-content">
+                <div class="skills-interface">
+                    <div class="skills-header">
+                        <h2>⚡ Available Skills</h2>
+                        <p>AI capabilities and tools</p>
+                    </div>
+                    
+                    <div class="skills-grid" id="skillsGrid">
+                        <!-- Skills will be loaded here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Memory View -->
+            <div id="memoryView" class="view-content">
+                <div class="memory-interface">
+                    <div class="memory-header">
+                        <h2>🧠 Memory & History</h2>
+                        <p>Conversation history and learned preferences</p>
+                    </div>
+                    
+                    <div class="memory-stats">
+                        <div class="stat-card">
+                            <h3>Conversations</h3>
+                            <div id="conversationCount">Loading...</div>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Preferences</h3>
+                            <div id="preferencesCount">Loading...</div>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Memory Size</h3>
+                            <div id="memorySize">Loading...</div>
+                        </div>
+                    </div>
+
+                    <div class="memory-content">
+                        <div class="memory-section">
+                            <h3>Recent Conversations</h3>
+                            <div id="recentConversations">Loading recent conversations...</div>
+                        </div>
+                        
+                        <div class="memory-section">
+                            <h3>Learned Preferences</h3>
+                            <div id="learnedPreferences">Loading preferences...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings View -->
+            <div id="settingsView" class="view-content">
+                <div class="settings-interface">
+                    <div class="settings-header">
+                        <h2>⚙️ Settings</h2>
+                        <p>Configure BUDDY's behavior and preferences</p>
+                    </div>
+                    
+                    <div class="settings-groups">
+                        <div class="settings-group">
+                            <h3>Voice Settings</h3>
+                            <div class="setting-item">
+                                <label>
+                                    <input type="checkbox" id="enableVoice" checked>
+                                    Enable Voice Recognition
+                                </label>
+                            </div>
+                            <div class="setting-item">
+                                <label>
+                                    <input type="checkbox" id="enableWakeWord" checked>
+                                    Enable Wake Word Detection
+                                </label>
+                            </div>
+                            <div class="setting-item">
+                                <label>Voice Sensitivity:</label>
+                                <input type="range" id="voiceSensitivity" min="0" max="100" value="70">
+                                <span>70%</span>
+                            </div>
+                        </div>
+
+                        <div class="settings-group">
+                            <h3>Interface Settings</h3>
+                            <div class="setting-item">
+                                <label>
+                                    <input type="checkbox" id="enableAnimations" checked>
+                                    Enable Animations
+                                </label>
+                            </div>
+                            <div class="setting-item">
+                                <label>
+                                    <input type="checkbox" id="enableSounds" checked>
+                                    Enable Sound Effects
+                                </label>
+                            </div>
+                            <div class="setting-item">
+                                <label>Theme:</label>
+                                <select id="themeSelect">
+                                    <option value="light">Light</option>
+                                    <option value="dark">Dark</option>
+                                    <option value="auto">Auto</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="settings-group">
+                            <h3>Privacy & Security</h3>
+                            <div class="setting-item">
+                                <label>
+                                    <input type="checkbox" id="enableLocalProcessing" checked>
+                                    Local Processing Only
+                                </label>
+                            </div>
+                            <div class="setting-item">
+                                <label>
+                                    <input type="checkbox" id="enableDataEncryption" checked>
+                                    Enable Data Encryption
+                                </label>
+                            </div>
+                            <div class="setting-item">
+                                <button class="btn btn-primary" onclick="clearAllData()">Clear All Data</button>
+                            </div>
+                        </div>
+
+                        <div class="settings-group">
+                            <h3>System Information</h3>
+                            <div class="info-item">
+                                <label>Version:</label>
+                                <span>BUDDY AI v2.0 </span>
+                            </div>
+                            <div class="info-item">
+                                <label>Status:</label>
+                                <span class="status-online">Online & Ready</span>
+                            </div>
+                            <div class="info-item">
+                                <label>Uptime:</label>
+                                <span id="systemUptime">Loading...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Enhanced Skills Panel -->
+        <div class="skills-panel" id="skillsPanel" role="dialog" aria-labelledby="skillsTitle" aria-hidden="true">
+            <div class="skills-header">
+                <h3 id="skillsTitle">Available Skills</h3>
+                <button onclick="toggleSkills()" style="float: right; background: none; border: none; font-size: 1.2em; cursor: pointer;" aria-label="Close skills panel">×</button>
+            </div>
+            <div id="skillsList" role="list">
+                <!-- Skills will be loaded here -->
+            </div>
+        </div>
+
+        <!-- Mobile Toolbar for additional actions -->
+        <div class="mobile-toolbar" id="mobileToolbar">
+            <button class="mobile-action-btn" onclick="toggleQuickActions()" aria-label="Quick actions">Quick</button>
+            <button class="mobile-action-btn" onclick="toggleDarkMode()" aria-label="Toggle dark mode">🌙</button>
+            <button class="mobile-action-btn" onclick="toggleFullscreen()" aria-label="Toggle fullscreen">⛶</button>
+            <button class="mobile-action-btn" onclick="shareConversation()" aria-label="Share conversation">📤</button>
+        </div>
+    </div>
+
+    <script>
+        class BuddyGUI {
+            constructor() {
+                this.websocket = null;
+                this.isRecording = false;
+                this.mediaRecorder = null;
+                this.audioChunks = [];
+                this.init();
+            }
+
+            init() {
+                this.setupEventListeners();
+                this.connectWebSocket();
+                this.loadSkills();
+                this.setupVoiceRecognition();
+                
+                // Set default view to chat
+                this.switchView('chat');
+                document.querySelector('[data-view="chat"]').classList.add('active');
+                
+                // Record start time for uptime tracking
+                if (!localStorage.getItem('buddyStartTime')) {
+                    localStorage.setItem('buddyStartTime', Date.now());
+                }
+                
+                // Apply saved theme
+                const savedTheme = localStorage.getItem('theme') || 'light';
+                this.applyTheme(savedTheme);
+                
+                console.log('BUDDY GUI initialized successfully!');
+            }
+
+            initialize() {
+                // Alias for init() to maintain compatibility
+                this.init();
+            }
+
+            setupEventListeners() {
+                // Message input
+                document.getElementById('messageInput').addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        this.sendMessage();
+                    }
+                });
+
+                // Navigation
+                document.querySelectorAll('.nav-item').forEach(item => {
+                    item.addEventListener('click', () => {
+                        const view = item.getAttribute('data-view');
+                        this.switchView(view);
+                        
+                        document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+                        item.classList.add('active');
+                    });
+                });
+
+                // Settings event listeners
+                this.setupSettingsEventListeners();
+            }
+
+            switchView(viewName) {
+                // Hide all views
+                document.querySelectorAll('.view-content').forEach(view => {
+                    view.classList.remove('active');
+                });
+
+                // Show selected view
+                const targetView = document.getElementById(`${viewName}View`);
+                if (targetView) {
+                    targetView.classList.add('active');
+                    
+                    // Update page title
+                    const titles = {
+                        'chat': 'Chat Interface',
+                        'voice': 'Voice Recognition',
+                        'skills': 'Available Skills',
+                        'memory': 'Memory & History',
+                        'settings': 'Settings'
+                    };
+                    document.getElementById('pageTitle').textContent = titles[viewName] || 'BUDDY AI';
+                    
+                    // Load view-specific content
+                    this.loadViewContent(viewName);
+                }
+            }
+
+            async loadViewContent(viewName) {
+                switch (viewName) {
+                    case 'voice':
+                        await this.loadVoiceStatus();
+                        break;
+                    case 'skills':
+                        await this.loadSkillsDetailed();
+                        break;
+                    case 'memory':
+                        await this.loadMemoryStats();
+                        break;
+                    case 'settings':
+                        this.loadSettings();
+                        break;
+                }
+            }
+
+            async loadVoiceStatus() {
+                try {
+                    const response = await fetch('/api/v1/jarvis/status');
+                    if (response.ok) {
+                        const data = await response.json();
+                        document.getElementById('voicePipelineStatus').textContent = 
+                            data.state === 'listening' ? '🟢 Active & Listening' : '🟡 Ready';
+                        document.getElementById('voiceAccuracy').textContent = 
+                            `${Math.round(data.performance_metrics?.avg_accuracy * 100 || 95)}%`;
+                        document.getElementById('responseTime').textContent = 
+                            `${Math.round(data.performance_metrics?.avg_latency_ms || 280)}ms`;
+                    }
+                } catch (error) {
+                    console.error('Error loading voice status:', error);
+                }
+            }
+
+            async loadSkillsDetailed() {
+                try {
+                    const response = await fetch('/api/v1/skills');
+                    if (response.ok) {
+                        const skills = await response.json();
+                        this.displayDetailedSkills(skills);
+                    } else {
+                        // Fallback to default skills if API fails
+                        console.warn('Skills API failed, using fallback skills');
+                        this.displayFallbackSkills();
+                    }
+                } catch (error) {
+                    console.error('Error loading skills:', error);
+                    this.displayFallbackSkills();
+                }
+            }
+
+            displayFallbackSkills() {
+                const fallbackSkills = [
+                    {
+                        name: 'reminders.create',
+                        description: 'Create and manage personal reminders',
+                        version: '1.0.0',
+                        category: 'productivity'
+                    },
+                    {
+                        name: 'weather.get_current',
+                        description: 'Get current weather conditions and forecasts',
+                        version: '1.0.0',
+                        category: 'information'
+                    },
+                    {
+                        name: 'timer.create',
+                        description: 'Set and manage timers for various activities',
+                        version: '1.0.0',
+                        category: 'productivity'
+                    },
+                    {
+                        name: 'notes.create',
+                        description: 'Create and organize personal notes',
+                        version: '1.0.0',
+                        category: 'productivity'
+                    },
+                    {
+                        name: 'calculator.evaluate',
+                        description: 'Perform mathematical calculations and conversions',
+                        version: '1.0.0',
+                        category: 'utility'
+                    }
+                ];
+                
+                this.displayDetailedSkills(fallbackSkills);
+            }
+
+            displayDetailedSkills(skills) {
+                const skillsGrid = document.getElementById('skillsGrid');
+                skillsGrid.innerHTML = '';
+                
+                skills.forEach(skill => {
+                    const skillCard = document.createElement('div');
+                    skillCard.className = 'skill-card';
+                    skillCard.innerHTML = `
+                        <h3>
+                            <i>${this.getSkillIcon(skill.name)}</i>
+                            ${skill.name}
+                        </h3>
+                        <p>${skill.description}</p>
+                        <div class="skill-version">v${skill.version || '1.0.0'}</div>
+                    `;
+                    skillCard.onclick = () => this.useSkillFromView(skill);
+                    skillsGrid.appendChild(skillCard);
+                });
+            }
+
+            getSkillIcon(skillName) {
+                const icons = {
+                    'reminders': '⏰',
+                    'weather': '🌤️',
+                    'timer': '⏱️',
+                    'notes': '📝',
+                    'calculator': '🧮'
+                };
+                return icons[skillName.split('.')[0]] || '⚡';
+            }
+
+            useSkillFromView(skill) {
+                // Switch to chat view and use skill
+                this.switchView('chat');
+                document.querySelector('[data-view="chat"]').classList.add('active');
+                document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+                document.querySelector('[data-view="chat"]').classList.add('active');
+                
+                const input = document.getElementById('messageInput');
+                input.value = `Use ${skill.name}`;
+                input.focus();
+            }
+
+            async loadMemoryStats() {
+                try {
+                    const response = await fetch('/api/v1/memory/stats');
+                    if (response.ok) {
+                        const stats = await response.json();
+                        document.getElementById('conversationCount').textContent = stats.conversations || '31';
+                        document.getElementById('preferencesCount').textContent = stats.preferences || '0';
+                        document.getElementById('memorySize').textContent = stats.memory_size || '2.4 MB';
+                        
+                        // Load recent conversations
+                        this.displayRecentConversations(stats.recent_conversations || []);
+                        this.displayLearnedPreferences(stats.learned_preferences || []);
+                    }
+                } catch (error) {
+                    console.error('Error loading memory stats:', error);
+                    // Show fallback data
+                    document.getElementById('conversationCount').textContent = '31';
+                    document.getElementById('preferencesCount').textContent = '0';
+                    document.getElementById('memorySize').textContent = '2.4 MB';
+                    document.getElementById('recentConversations').innerHTML = 'Recent conversation data will appear here when available.';
+                    document.getElementById('learnedPreferences').innerHTML = 'Learned preferences will appear here as BUDDY gets to know you better.';
+                }
+            }
+
+            displayRecentConversations(conversations) {
+                const container = document.getElementById('recentConversations');
+                if (conversations.length === 0) {
+                    container.innerHTML = 'No recent conversations to display.';
+                    return;
+                }
+                
+                container.innerHTML = conversations.slice(0, 5).map(conv => `
+                    <div style="padding: 10px; border-bottom: 1px solid #eee; margin-bottom: 10px;">
+                        <strong>${new Date(conv.timestamp).toLocaleDateString()}</strong><br>
+                        <span style="color: #666;">${conv.topic || 'General conversation'}</span>
+                    </div>
+                `).join('');
+            }
+
+            displayLearnedPreferences(preferences) {
+                const container = document.getElementById('learnedPreferences');
+                if (preferences.length === 0) {
+                    container.innerHTML = 'BUDDY is learning your preferences. Keep chatting to help improve responses!';
+                    return;
+                }
+                
+                container.innerHTML = preferences.map(pref => `
+                    <div style="padding: 10px; border-bottom: 1px solid #eee; margin-bottom: 10px;">
+                        <strong>${pref.category}</strong><br>
+                        <span style="color: #666;">${pref.value}</span>
+                    </div>
+                `).join('');
+            }
+
+            loadSettings() {
+                // Load current settings from localStorage or defaults
+                const settings = this.getCurrentSettings();
+                
+                document.getElementById('enableVoice').checked = settings.enableVoice;
+                document.getElementById('enableWakeWord').checked = settings.enableWakeWord;
+                document.getElementById('voiceSensitivity').value = settings.voiceSensitivity;
+                document.getElementById('enableAnimations').checked = settings.enableAnimations;
+                document.getElementById('enableSounds').checked = settings.enableSounds;
+                document.getElementById('themeSelect').value = settings.theme;
+                document.getElementById('enableLocalProcessing').checked = settings.enableLocalProcessing;
+                document.getElementById('enableDataEncryption').checked = settings.enableDataEncryption;
+                
+                // Update uptime
+                this.updateSystemUptime();
+            }
+
+            getCurrentSettings() {
+                return {
+                    enableVoice: localStorage.getItem('enableVoice') !== 'false',
+                    enableWakeWord: localStorage.getItem('enableWakeWord') !== 'false',
+                    voiceSensitivity: localStorage.getItem('voiceSensitivity') || '70',
+                    enableAnimations: localStorage.getItem('enableAnimations') !== 'false',
+                    enableSounds: localStorage.getItem('enableSounds') !== 'false',
+                    theme: localStorage.getItem('theme') || 'light',
+                    enableLocalProcessing: localStorage.getItem('enableLocalProcessing') !== 'false',
+                    enableDataEncryption: localStorage.getItem('enableDataEncryption') !== 'false'
+                };
+            }
+
+            setupSettingsEventListeners() {
+                // Voice settings
+                document.getElementById('enableVoice').addEventListener('change', (e) => {
+                    localStorage.setItem('enableVoice', e.target.checked);
+                });
+                
+                document.getElementById('enableWakeWord').addEventListener('change', (e) => {
+                    localStorage.setItem('enableWakeWord', e.target.checked);
+                });
+                
+                document.getElementById('voiceSensitivity').addEventListener('input', (e) => {
+                    localStorage.setItem('voiceSensitivity', e.target.value);
+                    e.target.nextElementSibling.textContent = e.target.value + '%';
+                });
+                
+                // Interface settings
+                document.getElementById('enableAnimations').addEventListener('change', (e) => {
+                    localStorage.setItem('enableAnimations', e.target.checked);
+                });
+                
+                document.getElementById('enableSounds').addEventListener('change', (e) => {
+                    localStorage.setItem('enableSounds', e.target.checked);
+                });
+                
+                document.getElementById('themeSelect').addEventListener('change', (e) => {
+                    localStorage.setItem('theme', e.target.value);
+                    this.applyTheme(e.target.value);
+                });
+                
+                // Privacy settings
+                document.getElementById('enableLocalProcessing').addEventListener('change', (e) => {
+                    localStorage.setItem('enableLocalProcessing', e.target.checked);
+                });
+                
+                document.getElementById('enableDataEncryption').addEventListener('change', (e) => {
+                    localStorage.setItem('enableDataEncryption', e.target.checked);
+                });
+            }
+
+            applyTheme(theme) {
+                document.body.className = theme === 'dark' ? 'dark-mode' : '';
+            }
+
+            updateSystemUptime() {
+                const startTime = localStorage.getItem('buddyStartTime') || Date.now();
+                const uptime = Date.now() - startTime;
+                const hours = Math.floor(uptime / (1000 * 60 * 60));
+                const minutes = Math.floor((uptime % (1000 * 60 * 60)) / (1000 * 60));
+                document.getElementById('systemUptime').textContent = `${hours}h ${minutes}m`;
+            }
+
+            connectWebSocket() {
+                const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+                const wsUrl = `${protocol}//${window.location.host}/ws/voice`;
+                
+                try {
+                    this.websocket = new WebSocket(wsUrl);
+                    
+                    this.websocket.onopen = () => {
+                        console.log('Connected to BUDDY');
+                        this.updateConnectionStatus('Connected & Ready');
+                        
+                        // Request voice status once connected
+                        setTimeout(() => {
+                            this.requestVoiceStatus();
+                        }, 1000);
+                    };
+                    
+                    this.websocket.onmessage = (event) => {
+                        const data = JSON.parse(event.data);
+                        this.handleWebSocketMessage(data);
+                    };
+                    
+                    this.websocket.onclose = () => {
+                        console.log('Disconnected from BUDDY');
+                        this.updateConnectionStatus('Disconnected');
+                        this.updateVoicePipelineStatus('Disconnected');
+                        // Attempt to reconnect after 5 seconds
+                        setTimeout(() => this.connectWebSocket(), 5000);
+                    };
+                    
+                    this.websocket.onerror = (error) => {
+                        console.error('WebSocket error:', error);
+                        this.updateConnectionStatus('Connection Error');
+                    };
+                } catch (error) {
+                    console.error('Failed to connect WebSocket:', error);
+                    this.updateConnectionStatus('Connection Failed');
+                }
+            }
+
+            requestVoiceStatus() {
+                if (this.websocket && this.websocket.readyState === WebSocket.OPEN) {
+                    this.websocket.send(JSON.stringify({
+                        type: 'status_request',
+                        timestamp: new Date().toISOString()
+                    }));
+                }
+            }
+
+            updateConnectionStatus(status) {
+                const statusElement = document.querySelector('.status-indicator');
+                if (statusElement) {
+                    statusElement.textContent = status;
+                    statusElement.className = 'status-indicator ' + 
+                        (status.includes('Connected') ? 'connected' : 'disconnected');
+                }
+            }
+
+            updateVoicePipelineStatus(status) {
+                const pipelineStatus = document.querySelector('#voicePipelineStatus');
+                if (pipelineStatus) {
+                    pipelineStatus.textContent = status;
+                }
+            }
+
+            handleWebSocketMessage(data) {
+                switch (data.type) {
+                    case 'status':
+                        if (data.pipeline_status) {
+                            this.updateVoicePipelineStatus(data.pipeline_status === 'ready' ? 'Ready' : 'Initializing...');
+                        }
+                        if (data.recognition_accuracy) {
+                            const accuracyElement = document.querySelector('#recognitionAccuracy');
+                            if (accuracyElement) {
+                                accuracyElement.textContent = data.recognition_accuracy;
+                            }
+                        }
+                        if (data.response_time) {
+                            const responseTimeElement = document.querySelector('#responseTime');
+                            if (responseTimeElement) {
+                                responseTimeElement.textContent = data.response_time;
+                            }
+                        }
+                        if (data.wake_words) {
+                            const wakeWordsElement = document.querySelector('#wakeWordsDisplay');
+                            if (wakeWordsElement) {
+                                wakeWordsElement.textContent = data.wake_words.join(', ');
+                            }
+                        }
+                        console.log('Voice status updated:', data);
+                        break;
+                    case 'transcription':
+                        this.addMessage('user', data.text);
+                        break;
+                    case 'response':
+                        this.hideTypingIndicator();
+                        this.addMessage('buddy', data.text);
+                        break;
+                    case 'command_response':
+                        console.log('Voice command processed:', data);
+                        if (data.response) {
+                            this.addMessage('buddy', data.response);
+                        }
+                        break;
+                    case 'text_response':
+                        console.log('Text response:', data);
+                        break;
+                    case 'error':
+                        this.hideTypingIndicator();
+                        this.addMessage('buddy', '❌ Sorry, I encountered an error. Please try again.');
+                        console.error('WebSocket error:', data);
+                        break;
+                    case 'pong':
+                        console.log('WebSocket ping response received');
+                        break;
+                    default:
+                        console.log('Unknown WebSocket message type:', data.type, data);
+                }
+            }
+
+            async sendMessage() {
+                const input = document.getElementById('messageInput');
+                const message = input.value.trim();
+                
+                if (!message) return;
+                
+                this.addMessage('user', message);
+                input.value = '';
+                
+                this.showTypingIndicator();
+                
+                try {
+                    // Send message to backend API
+                    const response = await fetch('/api/v1/voice/text', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ text: message })
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        this.hideTypingIndicator();
+                        this.addMessage('buddy', data.response || 'No response received');
+                    } else {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+                } catch (error) {
+                    console.error('Error sending message:', error);
+                    this.hideTypingIndicator();
+                    
+                    // Fallback to local response if API fails
+                    const fallbackResponse = this.generateIntelligentResponse(message);
+                    this.addMessage('buddy', `❌ API Error: ${error.message}\n\n📝 Fallback Response:\n${fallbackResponse}`);
+                }
+            }
+
+            generateIntelligentResponse(message) {
+                const msg = message.toLowerCase();
+                
+                // Advanced University-Level Educational Topics
+                
+                // STEM SUBJECTS
+                if (msg.includes('chemistry') || msg.includes('chemisty')) {
+                    if (msg.includes('organic')) {
+                        return `🧪 **Organic Chemistry - Carbon-Based Life:**
+
+**📝 Core Concepts:**
+• **Functional Groups**: Hydroxyl (-OH), Carbonyl (C=O), Carboxyl (-COOH), Amino (-NH₂)
+• **Stereochemistry**: Chirality, enantiomers, and optical activity
+• **Reaction Mechanisms**: SN1, SN2, E1, E2 elimination and substitution
+• **Aromatic Compounds**: Benzene rings, electrophilic aromatic substitution
+
+**🔬 Key Reactions:**
+• **Aldol Condensation**: C-C bond formation in carbonyl chemistry
+• **Grignard Reactions**: Nucleophilic addition to carbonyls
+• **Diels-Alder**: [4+2] cycloaddition reactions
+• **Friedel-Crafts**: Aromatic substitution reactions
+
+**🧬 Biomolecules:**
+• **Proteins**: Amino acid polymers with primary to quaternary structure
+• **Carbohydrates**: Monosaccharides to complex polysaccharides
+• **Lipids**: Fatty acids, phospholipids, and cholesterol
+• **Nucleic Acids**: DNA/RNA structure and function`;
+                    }
+                    if (msg.includes('basic') || msg.includes('explain') || msg.includes('about')) {
+                        return `🧪 **Chemistry - The Science of Matter:**
+
+**🔬 Core Branches:**
+• **Organic Chemistry**: Study of carbon-based compounds (living things)
+• **Inorganic Chemistry**: Study of non-carbon compounds (metals, minerals)
+• **Physical Chemistry**: How chemical reactions work at the molecular level
+• **Analytical Chemistry**: Identifying and measuring chemical substances
+• **Biochemistry**: Chemistry of living organisms
+
+**⚛️ Fundamental Concepts:**
+• **Atoms**: Basic building blocks of matter (protons, neutrons, electrons)
+• **Elements**: Pure substances with unique atomic numbers (H, O, C, etc.)
+• **Compounds**: Two or more elements chemically bonded (H₂O, CO₂)
+• **Chemical Bonds**: Ionic, covalent, and metallic bonds
+• **Chemical Reactions**: Processes where substances transform into new ones
+
+**🧮 Applications:**
+• Medicine and pharmaceuticals • Materials science and engineering
+• Environmental science and sustainability • Food science and nutrition
+
+Would you like me to explain any specific chemistry topic in more detail?`;
+                    }
+                    return `🧪 **Chemistry** is the fascinating science that studies matter and its transformations! What specific aspect interests you?`;
+                }
+                
+                if (msg.includes('biology') || msg.includes('molecular biology') || msg.includes('genetics')) {
+                    return `🧬 **Biology - The Science of Life:**
+
+**🔬 Major Fields:**
+• **Molecular Biology**: DNA, RNA, protein synthesis, gene expression
+• **Cell Biology**: Cell structure, organelles, membrane transport
+• **Genetics**: Heredity, mutations, genetic engineering, CRISPR
+• **Ecology**: Ecosystems, biodiversity, environmental interactions
+• **Evolution**: Natural selection, speciation, phylogenetics
+
+**🧪 Key Processes:**
+• **DNA Replication**: Semi-conservative copying of genetic material
+• **Transcription**: DNA → RNA synthesis in the nucleus
+• **Translation**: RNA → Protein synthesis at ribosomes
+• **Photosynthesis**: Light energy → Chemical energy (6CO₂ + 6H₂O → C₆H₁₂O₆)
+• **Cellular Respiration**: Glucose → ATP energy production
+
+**🔬 Modern Applications:**
+• **Biotechnology**: Genetic engineering, synthetic biology
+• **Medical Research**: Cancer biology, immunology, drug development
+• **Conservation**: Species preservation, habitat restoration`;
+                }
+                
+                if (msg.includes('calculus') || msg.includes('derivative') || msg.includes('integral')) {
+                    return `📐 **Calculus - The Mathematics of Change:**
+
+**📊 Differential Calculus:**
+• **Limits**: lim(x→a) f(x), continuity, squeeze theorem
+• **Derivatives**: Rate of change, tangent lines, optimization
+• **Chain Rule**: d/dx[f(g(x))] = f'(g(x)) · g'(x)
+• **Critical Points**: f'(x) = 0, maxima, minima, inflection points
+
+**∫ Integral Calculus:**
+• **Definite Integrals**: Area under curves, Fundamental Theorem
+• **Integration Techniques**: Substitution, parts, partial fractions
+• **Applications**: Volume, surface area, work, probability
+
+**🔬 Multivariable Calculus:**
+• **Partial Derivatives**: ∂f/∂x, gradient vectors, directional derivatives
+• **Multiple Integrals**: Double and triple integrals, Jacobians
+• **Vector Calculus**: Divergence, curl, line integrals, Green's theorem
+
+**💡 Real-World Applications:**
+• **Physics**: Motion, electromagnetism, quantum mechanics
+• **Engineering**: Optimization, signal processing, control systems`;
+                }
+                
+                if (msg.includes('linear algebra') || msg.includes('matrix') || msg.includes('vector')) {
+                    return `🔢 **Linear Algebra - Foundation of Modern Mathematics:**
+
+**📊 Core Concepts:**
+• **Vector Spaces**: Linear combinations, basis, dimension
+• **Matrices**: Operations, determinants, rank, inverse
+• **Linear Transformations**: Kernel, image, change of basis
+• **Eigenvalues/Eigenvectors**: Av = λv, diagonalization
+
+**🧮 Key Applications:**
+• **Computer Graphics**: 3D transformations, rotations, scaling
+• **Data Science**: PCA, dimensionality reduction, machine learning
+• **Quantum Mechanics**: State vectors, operators, measurements
+• **Economics**: Input-output models, optimization, game theory
+
+**💻 Computational Methods:**
+• **Gaussian Elimination**: System solving, RREF
+• **QR Decomposition**: Orthogonalization, least squares
+• **SVD**: Singular Value Decomposition for data analysis`;
+                }
+                
+                // HUMANITIES & SOCIAL SCIENCES
+                if (msg.includes('psychology') || msg.includes('cognitive')) {
+                    return `🧠 **Psychology - The Science of Mind and Behavior:**
+
+**🔬 Major Branches:**
+• **Cognitive Psychology**: Memory, attention, perception, decision-making
+• **Social Psychology**: Group behavior, attitudes, prejudice, conformity
+• **Developmental Psychology**: Lifespan development, learning, attachment
+• **Clinical Psychology**: Mental health, therapy, psychological disorders
+• **Neuropsychology**: Brain-behavior relationships, neural mechanisms
+
+**🧪 Research Methods:**
+• **Experimental Design**: Controls, variables, randomization
+• **Statistical Analysis**: t-tests, ANOVA, regression, effect sizes
+• **Observational Studies**: Naturalistic observation, case studies
+• **Psychometrics**: Test reliability, validity, standardization
+
+**💡 Key Theories:**
+• **Behaviorism**: Learning through conditioning (Pavlov, Skinner)
+• **Cognitive Revolution**: Information processing, mental models
+• **Social Learning**: Observational learning, modeling (Bandura)`;
+                }
+                
+                if (msg.includes('philosophy') || msg.includes('ethics') || msg.includes('logic')) {
+                    return `🤔 **Philosophy - The Love of Wisdom:**
+
+**📚 Major Branches:**
+• **Metaphysics**: Nature of reality, existence, time, causation
+• **Epistemology**: Knowledge, truth, belief, skepticism
+• **Ethics**: Moral philosophy, right and wrong, virtue ethics
+• **Logic**: Valid reasoning, arguments, formal systems
+• **Aesthetics**: Beauty, art, taste, aesthetic experience
+
+**💭 Key Philosophical Questions:**
+• **Free Will vs Determinism**: Do we have genuine choice?
+• **Mind-Body Problem**: What is consciousness? How does mind relate to brain?
+• **Personal Identity**: What makes you "you" over time?
+• **Meaning of Life**: Purpose, value, existential questions
+
+**🔍 Logical Reasoning:**
+• **Deductive Arguments**: Valid conclusions from premises
+• **Inductive Arguments**: Probability-based reasoning
+• **Fallacies**: Common errors in reasoning (ad hominem, straw man)`;
+                }
+                
+                if (msg.includes('economics') || msg.includes('microeconomics') || msg.includes('macroeconomics')) {
+                    return `💰 **Economics - The Science of Choice and Scarcity:**
+
+**📊 Microeconomics:**
+• **Supply & Demand**: Price determination, market equilibrium
+• **Elasticity**: Price sensitivity, income effects, substitution
+• **Consumer Theory**: Utility maximization, indifference curves
+• **Producer Theory**: Cost minimization, profit maximization
+• **Market Structures**: Perfect competition, monopoly, oligopoly
+
+**🌍 Macroeconomics:**
+• **GDP**: Gross Domestic Product, economic growth measurement
+• **Inflation**: Price level changes, monetary policy effects
+• **Unemployment**: Types, natural rate, Phillips curve
+• **Fiscal Policy**: Government spending, taxation, budget deficits
+• **Monetary Policy**: Interest rates, money supply, central banking
+
+**📈 Advanced Topics:**
+• **Game Theory**: Strategic decision-making, Nash equilibrium
+• **Behavioral Economics**: Psychology meets economics, biases
+• **International Trade**: Comparative advantage, trade policies`;
+                }
+                
+                // PHYSICAL SCIENCES & ENGINEERING
+                if (msg.includes('physics') || msg.includes('quantum') || msg.includes('relativity')) {
+                    if (msg.includes('quantum')) {
+                        return `⚛️ **Quantum Physics - The Quantum World:**
+
+**🔬 Core Principles:**
+• **Wave-Particle Duality**: Light and matter exhibit both wave and particle properties
+• **Uncertainty Principle**: Δx·Δp ≥ ħ/2 (Heisenberg)
+• **Superposition**: Quantum states can exist in multiple states simultaneously
+• **Entanglement**: Quantum correlations between distant particles
+
+**🧮 Key Equations:**
+• **Schrödinger Equation**: iħ ∂ψ/∂t = Ĥψ
+• **Energy Quantization**: E = hf = ħω
+• **de Broglie Wavelength**: λ = h/p
+
+**💻 Applications:**
+• **Quantum Computing**: Qubits, quantum algorithms, cryptography
+• **Quantum Technology**: Lasers, MRI, atomic clocks
+• **Modern Electronics**: Semiconductors, LED technology`;
+                    }
+                    return `⚗️ **Physics - Understanding the Universe:**
+
+**🔬 Classical Physics:**
+• **Mechanics**: Newton's laws, energy, momentum, rotational dynamics
+• **Thermodynamics**: Heat, entropy, statistical mechanics
+• **Electromagnetism**: Maxwell's equations, electromagnetic waves
+• **Optics**: Light behavior, interference, diffraction
+
+**🌌 Modern Physics:**
+• **Special Relativity**: Time dilation, length contraction, E=mc²
+• **General Relativity**: Spacetime curvature, black holes, cosmology
+• **Quantum Mechanics**: Wave functions, probability, uncertainty
+• **Particle Physics**: Standard model, fundamental forces
+
+**🧮 Applications:**
+• **Engineering**: Mechanical, electrical, aerospace systems
+• **Technology**: Computers, smartphones, medical devices
+• **Research**: High-energy physics, astrophysics, materials science`;
+                }
+                
+                if (msg.includes('computer science') || msg.includes('programming') || msg.includes('algorithms')) {
+                    return `💻 **Computer Science - Computational Thinking:**
+
+**📊 Core Areas:**
+• **Algorithms & Data Structures**: Sorting, searching, trees, graphs
+• **Programming Languages**: Python, Java, C++, JavaScript, functional programming
+• **Software Engineering**: Design patterns, testing, version control
+• **Database Systems**: SQL, NoSQL, data modeling, transactions
+
+**🧠 Theoretical Foundations:**
+• **Computational Complexity**: Big O notation, P vs NP problem
+• **Automata Theory**: Finite state machines, Turing machines
+• **Formal Methods**: Logic, proofs, verification
+• **Discrete Mathematics**: Graph theory, combinatorics, number theory
+
+**🤖 Advanced Topics:**
+• **Machine Learning**: Neural networks, deep learning, AI algorithms
+• **Computer Graphics**: 3D rendering, computer vision, image processing
+• **Cybersecurity**: Cryptography, network security, ethical hacking
+• **Distributed Systems**: Cloud computing, blockchain, microservices`;
+                }
+                
+                if (msg.includes('statistics') || msg.includes('data science') || msg.includes('machine learning')) {
+                    return `📊 **Statistics & Data Science - Making Sense of Data:**
+
+**📈 Statistical Foundations:**
+• **Descriptive Statistics**: Mean, median, variance, standard deviation
+• **Probability Theory**: Distributions, Bayes' theorem, random variables
+• **Inferential Statistics**: Hypothesis testing, confidence intervals, p-values
+• **Regression Analysis**: Linear, logistic, multiple regression
+
+**🤖 Machine Learning:**
+• **Supervised Learning**: Classification, regression (SVM, Random Forest)
+• **Unsupervised Learning**: Clustering (K-means), dimensionality reduction (PCA)
+• **Deep Learning**: Neural networks, CNN, RNN, transformers
+• **Model Evaluation**: Cross-validation, ROC curves, precision/recall
+
+**💡 Applications:**
+• **Data Mining**: Pattern discovery, association rules
+• **Predictive Analytics**: Forecasting, risk assessment
+• **A/B Testing**: Experimental design for decision making
+• **Business Intelligence**: Dashboards, data visualization`;
+                }
+                
+                // HUMANITIES & LANGUAGES
+                if (msg.includes('literature') || msg.includes('english') || msg.includes('poetry')) {
+                    return `📚 **Literature - The Art of Language:**
+
+**📖 Major Genres:**
+• **Poetry**: Sonnets, free verse, epic poetry, literary devices
+• **Fiction**: Novels, short stories, character development, plot structure
+• **Drama**: Tragedy, comedy, theatrical elements, dialogue
+• **Non-fiction**: Essays, memoirs, biography, literary criticism
+
+**🎭 Literary Analysis:**
+• **Themes**: Universal human experiences, social commentary
+• **Symbolism**: Metaphors, allegory, imagery, motifs
+• **Historical Context**: Period influences, cultural movements
+• **Narrative Techniques**: Point of view, stream of consciousness
+
+**✍️ Writing Skills:**
+• **Academic Writing**: Thesis development, evidence, argumentation
+• **Creative Writing**: Character creation, dialogue, setting
+• **Research Methods**: Source evaluation, citation, plagiarism
+• **Rhetoric**: Persuasive techniques, audience analysis`;
+                }
+                
+                if (msg.includes('history') || msg.includes('historical')) {
+                    return `🏛️ **History - Understanding the Past:**
+
+**🌍 World History:**
+• **Ancient Civilizations**: Mesopotamia, Egypt, Greece, Rome, China
+• **Medieval Period**: Feudalism, Islamic Golden Age, Byzantine Empire
+• **Renaissance**: Humanism, scientific revolution, exploration
+• **Modern Era**: Industrial revolution, world wars, globalization
+
+**🔍 Historical Methods:**
+• **Primary Sources**: Documents, artifacts, eyewitness accounts
+• **Secondary Sources**: Scholarly interpretations, analysis
+• **Historiography**: How historical narratives are constructed
+• **Chronology**: Understanding causation and change over time
+
+**💭 Key Concepts:**
+• **Social History**: Daily life, class, gender, family structures
+• **Political History**: Government, power, revolution, diplomacy
+• **Economic History**: Trade, capitalism, labor, industrialization
+• **Cultural History**: Ideas, beliefs, art, intellectual movements`;
+                }
+                
+                if (msg.includes('memory') && !msg.includes('computer')) {
+                    return `🧠 **Memory - How We Remember:**
+
+Memory is the amazing ability to store, retain, and recall information:
+
+**🔄 Types of Memory:**
+• **Sensory Memory**: Brief storage of sensory information (0.5-3 seconds)
+• **Short-term Memory**: Temporary storage (15-30 seconds, 7±2 items)
+• **Long-term Memory**: Permanent storage with unlimited capacity
+
+**📚 Long-term Memory Categories:**
+• **Explicit (Declarative)**: Facts and events you consciously remember
+  - Episodic: Personal experiences and events
+  - Semantic: General knowledge and facts
+• **Implicit (Procedural)**: Skills and habits (riding a bike, typing)
+
+**🧬 How Memory Works:**
+• **Encoding**: Converting information into memory
+• **Storage**: Maintaining information over time
+• **Retrieval**: Accessing stored information when needed
+
+**💡 Memory Tips:**
+• Repetition and practice strengthen memory
+• Sleep helps consolidate memories
+• Association and visualization improve recall
+• Regular exercise benefits brain health
+
+Is there a specific aspect of memory you'd like to explore?`;
+                }
+                
+                // Knowledge-based responses
+                if (msg.includes('meningioma')) {
+                    return `🧠 **Meningioma Information:**
+
+Meningiomas are tumors that arise from the meninges, the membranes that surround the brain and spinal cord. Here are key facts:
+
+• **Type**: Usually benign (non-cancerous) brain tumors
+• **Location**: Most commonly occur along the outer surface of the brain
+• **Symptoms**: May include headaches, seizures, vision problems, or neurological deficits
+• **Treatment**: Options include observation, surgery, or radiation therapy
+• **Prognosis**: Generally good for benign meningiomas
+
+⚠️ **Important**: This is general information only. Please consult with a qualified healthcare professional for medical advice.`;
+                }
+                
+                if (msg.includes('physics')) {
+                    return `⚗️ **Physics Overview:**
+
+Physics is the fundamental science that seeks to understand how the universe works:
+
+• **Core Areas**: Mechanics, thermodynamics, electromagnetism, quantum mechanics, relativity
+• **Key Concepts**: Energy, matter, forces, space, and time
+• **Famous Equations**: E=mc², F=ma, Schrödinger equation
+• **Applications**: Technology, engineering, astronomy, medicine
+• **Modern Physics**: Quantum computing, particle physics, cosmology
+
+🧮 I can help with physics calculations, explain concepts, or discuss specific topics!`;
+                }
+                
+                if (msg.includes('math') || msg.includes('mathematics')) {
+                    return `📊 **Mathematics - The Language of the Universe:**
+
+Mathematics encompasses many areas of study:
+
+• **Pure Math**: Algebra, calculus, geometry, number theory, topology
+• **Applied Math**: Statistics, optimization, mathematical modeling
+• **Discrete Math**: Logic, combinatorics, graph theory
+• **Computational Math**: Numerical analysis, algorithms
+
+🧮 **I can help you with:**
+- Basic arithmetic and calculations
+- Algebraic equations
+- Percentage calculations
+- Unit conversions
+- Statistical analysis
+
+Try asking me: "Calculate 25% of 350" or "Convert 68°F to Celsius"`;
+                }
+                
+                // Greeting responses
+                if (msg.includes('hello') || msg.includes('hi') || msg === 'hey') {
+                    const greetings = [
+                        "Hello! I'm BUDDY, your AI assistant. How can I help you today?",
+                        "Hi there! Ready to assist you with any questions or tasks you have.",
+                        "Hey! I'm here and ready to help. What would you like to know or do?",
+                        "Hello! What can I help you accomplish today?"
+                    ];
+                    return greetings[Math.floor(Math.random() * greetings.length)];
+                }
+                
+                // How are you responses
+                if (msg.includes('how are you')) {
+                    return "I'm running perfectly! All systems are green and ready to help. My voice recognition is active, memory is functioning well, and I have access to various skills. What can I help you accomplish today?";
+                }
+                
+                // Capability inquiries
+                if (msg.includes('what can you') && (msg.includes('optimize') || msg.includes('do'))) {
+                    return `🚀 **I can help optimize and improve many things:**
+
+**🧠 Productivity:**
+- Time management and scheduling
+- Task organization and prioritization
+- Workflow automation suggestions
+
+**💻 Technology:**
+- Code review and suggestions
+- Performance optimization tips
+- System configuration advice
+
+**📝 Content:**
+- Writing and editing assistance
+- Research and information gathering
+- Documentation improvement
+
+**🔧 Problem Solving:**
+- Troubleshooting technical issues
+- Process improvement recommendations
+- Decision-making support
+
+What specific area would you like help optimizing?`;
+                }
+                
+                // Math calculation detection
+                if (this.containsMathExpression(msg)) {
+                    return this.solveMathProblem(msg);
+                }
+                
+                // Skill-related responses
+                if (msg.includes('skills') || msg.includes('what can you help')) {
+                    return `🛠️ **My Core Skills:**
+
+• **🎤 Voice Commands** - Natural language processing
+• **📝 Notes & Reminders** - Task management and memory
+• **🌤️ Weather Information** - Current conditions and forecasts
+• **🧮 Calculations** - Math problems and unit conversions
+• **⏲️ Timers & Alarms** - Time management tools
+• **🔍 Information Lookup** - Knowledge and research assistance
+
+Navigate to the Skills panel to see all available capabilities, or just ask me directly!`;
+                }
+                
+                // Time-related queries
+                if (msg.includes('time') || msg.includes('date')) {
+                    const now = new Date();
+                    return `🕐 **Current Time Information:**
+• Time: ${now.toLocaleTimeString()}
+• Date: ${now.toLocaleDateString()}
+• Day: ${now.toLocaleDateString('en', { weekday: 'long' })}
+
+Need me to set a timer or reminder? Just ask!`;
+                }
+                
+                // Default intelligent responses based on keywords
+                if (msg.includes('help')) {
+                    return "I'm here to help! You can ask me about various topics, request calculations, set reminders, get weather information, or use voice commands. What specific help do you need?";
+                }
+                
+                if (msg.includes('weather')) {
+                    return `🌤️ **Weather Information Service**
+
+I can help you with weather information! Here's what I can provide:
+
+• **Current Conditions** - Temperature, humidity, wind speed
+• **Daily Forecasts** - 7-day weather outlook  
+• **Hourly Forecasts** - Detailed hourly predictions
+• **Weather Alerts** - Storm warnings and advisories
+• **Historical Data** - Past weather patterns
+
+**To get started:**
+- Tell me your location: "What's the weather in New York?"
+- Ask for specific info: "Will it rain today?"
+- Get forecasts: "Weather forecast for this week"
+
+*Note: Weather services require internet connection and location access for accurate results.*`;
+                }
+
+                // Enhanced task/capability responses
+                if (msg.includes('what') && (msg.includes('task') || msg.includes('do'))) {
+                    return `🛠️ **My Core Capabilities:**
+
+**💬 Conversation & Chat:**
+- Natural language understanding
+- Contextual responses and follow-up questions
+- Multi-topic discussions
+
+**🧮 Mathematical Operations:**
+- Basic arithmetic (25 + 17, 84 / 4)
+- Percentage calculations (15% of 300)
+- Unit conversions (temperature, measurements)
+- Complex mathematical expressions
+
+**📝 Productivity Tools:**
+- Note creation and organization
+- Reminder setting and management
+- Timer and alarm functions
+- Task scheduling assistance
+
+**🌐 Information Services:**
+- Weather forecasts and conditions
+- General knowledge questions
+- Explanations of concepts (science, math, etc.)
+- Research assistance
+
+**🎤 Voice Integration:**
+- Voice command processing
+- Text-to-speech responses
+- Voice-activated controls
+
+**⚙️ System Management:**
+- Settings configuration
+- Memory and preference management
+- Cross-device synchronization
+
+Try asking me: "Set a reminder for 3 PM", "What's 25% of 400?", or "Explain quantum physics"!`;
+                }
+                
+                if (msg.includes('reminder') || msg.includes('remember')) {
+                    return "📝 I can help you set reminders! Try saying something like 'Remind me to call John at 3 PM' or 'Set a reminder for my meeting tomorrow at 9 AM'.";
+                }
+                
+                if (msg.includes('timer')) {
+                    return "⏲️ I can help you set timers! Try saying 'Set a timer for 5 minutes' or 'Start a 30-second timer'. Check the Skills panel for timer functions.";
+                }
+                
+                // Conversational responses
+                const conversationalResponses = [
+                    "That's interesting! What would you like me to help you with regarding that?",
+                    "I understand! How can I assist you with that specifically?",
+                    "Got it! Let me know how I can help you with that.",
+                    "I see what you're asking about. What specific assistance do you need?",
+                    "Interesting question! What aspect would you like me to focus on?"
+                ];
+                
+                return conversationalResponses[Math.floor(Math.random() * conversationalResponses.length)];
+            }
+
+            containsMathExpression(text) {
+                // Check for basic math patterns
+                const mathPatterns = [
+                    /\d+\s*[\+\-\*\/]\s*\d+/,
+                    /\d+\s*percent/i,
+                    /\d+%/,
+                    /calculate/i,
+                    /what\s+is\s+\d+/i,
+                    /convert.*to/i
+                ];
+                
+                return mathPatterns.some(pattern => pattern.test(text));
+            }
+
+            solveMathProblem(text) {
+                try {
+                    // Basic arithmetic detection
+                    const basicMath = text.match(/(\d+(?:\.\d+)?)\s*([\+\-\*\/])\s*(\d+(?:\.\d+)?)/);
+                    if (basicMath) {
+                        const [, num1, operator, num2] = basicMath;
+                        const a = parseFloat(num1);
+                        const b = parseFloat(num2);
+                        let result;
+                        
+                        switch (operator) {
+                            case '+': result = a + b; break;
+                            case '-': result = a - b; break;
+                            case '*': result = a * b; break;
+                            case '/': result = b !== 0 ? a / b : 'Cannot divide by zero'; break;
+                        }
+                        
+                        return `🧮 **Calculation Result:**
+${a} ${operator} ${b} = ${result}
+
+Need help with more complex calculations? Just ask!`;
+                    }
+                    
+                    // Percentage calculations
+                    const percentMatch = text.match(/(\d+(?:\.\d+)?)\s*%\s*of\s*(\d+(?:\.\d+)?)/i);
+                    if (percentMatch) {
+                        const [, percent, number] = percentMatch;
+                        const result = (parseFloat(percent) / 100) * parseFloat(number);
+                        return `🧮 **Percentage Calculation:**
+${percent}% of ${number} = ${result}`;
+                    }
+                    
+                    // Temperature conversion
+                    if (text.includes('fahrenheit') || text.includes('celsius') || text.includes('°f') || text.includes('°c')) {
+                        const tempMatch = text.match(/(\d+(?:\.\d+)?)\s*°?f/i);
+                        if (tempMatch) {
+                            const fahrenheit = parseFloat(tempMatch[1]);
+                            const celsius = (fahrenheit - 32) * 5/9;
+                            return `🌡️ **Temperature Conversion:**
+${fahrenheit}°F = ${celsius.toFixed(1)}°C`;
+                        }
+                        
+                        const tempMatchC = text.match(/(\d+(?:\.\d+)?)\s*°?c/i);
+                        if (tempMatchC) {
+                            const celsius = parseFloat(tempMatchC[1]);
+                            const fahrenheit = (celsius * 9/5) + 32;
+                            return `🌡️ **Temperature Conversion:**
+${celsius}°C = ${fahrenheit.toFixed(1)}°F`;
+                        }
+                    }
+                    
+                } catch (error) {
+                    console.error('Math calculation error:', error);
+                }
+                
+                return "🧮 I can help with calculations! Try asking me things like '25 * 18', '15% of 240', or 'Convert 68°F to Celsius'.";
+            }
+
+            addMessage(sender, content) {
+                const messagesContainer = document.getElementById('messages');
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${sender}`;
+                
+                const now = new Date();
+                const timeStr = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                
+                messageDiv.innerHTML = `
+                    <div class="message-header">${sender === 'user' ? 'You' : 'BUDDY'} • ${timeStr}</div>
+                    <div class="message-content">${content}</div>
+                `;
+                
+                messagesContainer.appendChild(messageDiv);
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }
+
+            showTypingIndicator() {
+                document.getElementById('typingIndicator').style.display = 'block';
+                const messagesContainer = document.getElementById('messages');
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }
+
+            hideTypingIndicator() {
+                document.getElementById('typingIndicator').style.display = 'none';
+            }
+
+            async setupVoiceRecognition() {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    this.mediaRecorder = new MediaRecorder(stream);
+                    
+                    this.mediaRecorder.ondataavailable = (event) => {
+                        this.audioChunks.push(event.data);
+                    };
+                    
+                    this.mediaRecorder.onstop = async () => {
+                        const audioBlob = new Blob(this.audioChunks, { type: 'audio/wav' });
+                        this.audioChunks = [];
+                        await this.sendAudioToServer(audioBlob);
+                    };
+                } catch (error) {
+                    console.error('Voice recognition setup failed:', error);
+                }
+            }
+
+            toggleVoice() {
+                if (!this.mediaRecorder) {
+                    alert('Voice recording not available. Please check your microphone permissions.');
+                    return;
+                }
+
+                const voiceBtn = document.getElementById('voiceBtn');
+                const voiceVisualizer = document.getElementById('voiceVisualizer');
+                
+                if (!this.isRecording) {
+                    this.startRecording();
+                    voiceBtn.classList.add('recording');
+                    voiceBtn.innerHTML = '<i>⏹️</i> Stop';
+                    voiceVisualizer.classList.add('active');
+                } else {
+                    this.stopRecording();
+                    voiceBtn.classList.remove('recording');
+                    voiceBtn.innerHTML = '<i>🎤</i> Voice';
+                    voiceVisualizer.classList.remove('active');
+                }
+            }
+
+            startRecording() {
+                this.isRecording = true;
+                this.audioChunks = [];
+                this.mediaRecorder.start();
+            }
+
+            stopRecording() {
+                this.isRecording = false;
+                this.mediaRecorder.stop();
+                this.showTypingIndicator();
+            }
+
+            async sendAudioToServer(audioBlob) {
+                try {
+                    const formData = new FormData();
+                    formData.append('audio', audioBlob, 'voice.wav');
+                    
+                    const response = await fetch('/api/v1/voice/audio', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        this.hideTypingIndicator();
+                        if (data.transcription) {
+                            this.addMessage('user', data.transcription);
+                        }
+                        if (data.response) {
+                            this.addMessage('buddy', data.response);
+                        }
+                    } else {
+                        this.hideTypingIndicator();
+                        this.addMessage('buddy', '❌ Sorry, I couldn\'t process your voice message.');
+                    }
+                } catch (error) {
+                    console.error('Error sending audio:', error);
+                    this.hideTypingIndicator();
+                    this.addMessage('buddy', '❌ Voice processing error. Please try again.');
+                }
+            }
+
+            async loadSkills() {
+                try {
+                    const response = await fetch('/api/v1/skills');
+                    if (response.ok) {
+                        const skills = await response.json();
+                        this.displaySkills(skills);
+                    }
+                } catch (error) {
+                    console.error('Error loading skills:', error);
+                }
+            }
+
+            displaySkills(skills) {
+                const skillsList = document.getElementById('skillsList');
+                skillsList.innerHTML = '';
+                
+                skills.forEach(skill => {
+                    const skillDiv = document.createElement('div');
+                    skillDiv.className = 'skill-item';
+                    skillDiv.innerHTML = `
+                        <div class="skill-name">${skill.name}</div>
+                        <div class="skill-description">${skill.description}</div>
+                    `;
+                    skillDiv.onclick = () => this.useSkill(skill);
+                    skillsList.appendChild(skillDiv);
+                });
+            }
+
+            useSkill(skill) {
+                const input = document.getElementById('messageInput');
+                input.value = `Use ${skill.name}`;
+                input.focus();
+            }
+
+            toggleSkills() {
+                const panel = document.getElementById('skillsPanel');
+                panel.classList.toggle('open');
+            }
+        }
+
+        // Global functions
+        function toggleSkills() {
+            window.buddyGUI.toggleSkills();
+        }
+
+        function toggleVoice() {
+            window.buddyGUI.toggleVoice();
+        }
+
+        function sendMessage() {
+            window.buddyGUI.sendMessage();
+        }
+
+        // Enhanced global functions for mobile features
+        function sendQuickMessage(message) {
+            const input = document.getElementById('messageInput');
+            input.value = message;
+            window.buddyGUI.sendMessage();
+        }
+
+        function toggleQuickActions() {
+            const quickActions = document.getElementById('quickActions');
+            const isVisible = quickActions.style.display !== 'none';
+            quickActions.style.display = isVisible ? 'none' : 'flex';
+        }
+
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
+        }
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else {
+                document.exitFullscreen();
+            }
+        }
+
+        function scrollToBottom() {
+            const messagesContainer = document.getElementById('messages');
+            messagesContainer.scrollTo({
+                top: messagesContainer.scrollHeight,
+                behavior: 'smooth'
+            });
+        }
+
+        function shareConversation() {
+            if (navigator.share) {
+                const messages = Array.from(document.querySelectorAll('.message')).map(msg => {
+                    const sender = msg.classList.contains('user') ? 'You' : 'BUDDY';
+                    const content = msg.querySelector('.message-content').textContent;
+                    return `${sender}: ${content}`;
+                }).join('\n\n');
+                
+                navigator.share({
+                    title: 'BUDDY Conversation',
+                    text: messages,
+                    url: window.location.href
+                });
+            } else {
+                // Fallback: copy to clipboard
+                navigator.clipboard.writeText(window.location.href).then(() => {
+                    alert('Link copied to clipboard!');
+                });
+            }
+        }
+
+        function exportConversation() {
+            if (window.buddyGUI && typeof window.buddyGUI.exportConversation === 'function') {
+                window.buddyGUI.exportConversation();
+            } else {
+                // Fallback export functionality
+                const messages = Array.from(document.querySelectorAll('.message')).map(msg => {
+                    const sender = msg.classList.contains('user') ? 'You' : 'BUDDY';
+                    const content = msg.querySelector('.message-content').textContent;
+                    const time = msg.querySelector('.message-header').textContent;
+                    return `${time}\n${sender}: ${content}\n`;
+                }).join('\n');
+                
+                const blob = new Blob([messages], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `buddy-conversation-${new Date().toISOString().split('T')[0]}.txt`;
+                a.click();
+                URL.revokeObjectURL(url);
+            }
+        }
+
+        function clearConversation() {
+            if (confirm('Clear all messages?')) {
+                document.getElementById('messages').innerHTML = '';
+                localStorage.removeItem('buddyConversation');
+                
+                // Add welcome message back
+                window.buddyGUI.addMessage('buddy', 
+                    'Hello! I\'m BUDDY, your personal AI assistant. How can I help you today?'
+                );
+            }
+        }
+
+        // Initialize enhanced features
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize main GUI
+            window.buddyGUI = new BuddyGUI();
+            window.buddyGUI.initialize();
+            
+            // Initialize mobile features
+            initializeMobileFeatures();
+            
+            // Initialize PWA features
+            initializePWA();
+            
+            // Load saved preferences
+            loadUserPreferences();
+        });
+
+        function initializeMobileFeatures() {
+            // Show mobile toolbar on small screens
+            if (window.innerWidth <= 768) {
+                document.getElementById('mobileToolbar').classList.add('show');
+                document.getElementById('quickActions').style.display = 'flex';
+                document.getElementById('exportBtn').style.display = 'inline-flex';
+            }
+            
+            // Handle scroll to bottom button
+            const messagesContainer = document.getElementById('messages');
+            const scrollBtn = document.getElementById('scrollToBottom');
+            
+            messagesContainer.addEventListener('scroll', () => {
+                const isAtBottom = messagesContainer.scrollTop + messagesContainer.clientHeight >= 
+                                  messagesContainer.scrollHeight - 10;
+                scrollBtn.classList.toggle('show', !isAtBottom);
+            });
+            
+            // Enhanced keyboard navigation
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    // Close any open panels
+                    document.getElementById('skillsPanel').classList.remove('open');
+                    document.getElementById('quickActions').style.display = 'none';
+                }
+            });
+        }
+
+        // Enhanced Cross-Device Functionality
+        class CrossDeviceManager {
+            constructor() {
+                this.deviceId = this.getOrCreateDeviceId();
+                this.connectedDevices = new Map();
+                this.syncInterval = null;
+                this.discoveryWebSocket = null;
+                this.init();
+            }
+            
+            getOrCreateDeviceId() {
+                let deviceId = localStorage.getItem('buddyDeviceId');
+                if (!deviceId) {
+                    deviceId = 'device-' + Math.random().toString(36).substr(2, 9);
+                    localStorage.setItem('buddyDeviceId', deviceId);
+                }
+                return deviceId;
+            }
+            
+            init() {
+                this.setupDeviceDiscovery();
+                this.setupDataSync();
+                this.setupDeviceInfo();
+                this.startHeartbeat();
+            }
+            
+            setupDeviceInfo() {
+                const deviceInfo = {
+                    id: this.deviceId,
+                    name: this.getDeviceName(),
+                    type: this.getDeviceType(),
+                    capabilities: this.getDeviceCapabilities(),
+                    lastSeen: Date.now(),
+                    networkInfo: this.getNetworkInfo()
+                };
+                localStorage.setItem('buddyDeviceInfo', JSON.stringify(deviceInfo));
+                return deviceInfo;
+            }
+            
+            getDeviceName() {
+                const saved = localStorage.getItem('buddyDeviceName');
+                if (saved) return saved;
+                
+                const platform = navigator.platform;
+                const userAgent = navigator.userAgent;
+                
+                if (/iPhone|iPad|iPod/.test(userAgent)) return 'iOS Device';
+                if (/Android/.test(userAgent)) return 'Android Device';
+                if (/Mac/.test(platform)) return 'Mac Computer';
+                if (/Win/.test(platform)) return 'Windows PC';
+                if (/Linux/.test(platform)) return 'Linux Computer';
+                return 'Unknown Device';
+            }
+            
+            getDeviceType() {
+                const userAgent = navigator.userAgent;
+                if (/Mobile|Android|iPhone|iPad/.test(userAgent)) return 'mobile';
+                if (/Tablet/.test(userAgent)) return 'tablet';
+                return 'desktop';
+            }
+            
+            getDeviceCapabilities() {
+                return {
+                    voice: 'mediaDevices' in navigator && 'getUserMedia' in navigator.mediaDevices,
+                    camera: 'mediaDevices' in navigator,
+                    geolocation: 'geolocation' in navigator,
+                    notifications: 'Notification' in window,
+                    storage: 'localStorage' in window,
+                    websockets: 'WebSocket' in window,
+                    offlineStorage: 'serviceWorker' in navigator
+                };
+            }
+            
+            getNetworkInfo() {
+                const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+                return {
+                    online: navigator.onLine,
+                    effectiveType: connection ? connection.effectiveType : 'unknown',
+                    downlink: connection ? connection.downlink : null,
+                    rtt: connection ? connection.rtt : null
+                };
+            }
+            
+            setupDeviceDiscovery() {
+                // Use HTTP polling for device discovery
+                this.startHttpDiscovery();
+            }
+            
+            startHttpDiscovery() {
+                // HTTP-based discovery for better compatibility
+                setInterval(() => {
+                    this.pollForDevices();
+                }, 5000);
+            }
+            
+            async pollForDevices() {
+                try {
+                    const response = await fetch('/api/v1/sync/devices', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(this.setupDeviceInfo())
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.devices) {
+                            this.updateDeviceList(data.devices);
+                        }
+                    }
+                } catch (error) {
+                    console.log('Device discovery polling failed:', error);
+                }
+            }
+            
+            setupDataSync() {
+                // Sync conversation data across devices
+                this.syncInterval = setInterval(() => {
+                    this.syncData();
+                }, 10000); // Sync every 10 seconds
+                
+                // Listen for storage changes from other tabs/windows
+                window.addEventListener('storage', (e) => {
+                    if (e.key === 'buddyConversation') {
+                        this.handleExternalDataUpdate(e.newValue);
+                    }
+                });
+            }
+            
+            async syncData() {
+                const conversationData = localStorage.getItem('buddyConversation');
+                const userPreferences = {
+                    darkMode: localStorage.getItem('darkMode'),
+                    voiceEnabled: localStorage.getItem('voiceEnabled'),
+                    deviceName: localStorage.getItem('buddyDeviceName')
+                };
+                
+                const syncData = {
+                    deviceId: this.deviceId,
+                    timestamp: Date.now(),
+                    conversation: conversationData,
+                    preferences: userPreferences,
+                    skills: this.getSkillsState()
+                };
+                
+                try {
+                    await fetch('/api/v1/sync/data', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(syncData)
+                    });
+                } catch (error) {
+                    // Sync failed - continue silently
+                }
+            }
+            
+            getSkillsState() {
+                const skillsPanel = document.getElementById('skills-list');
+                if (skillsPanel) {
+                    return {
+                        lastUpdated: Date.now(),
+                        skillsLoaded: skillsPanel.children.length > 0
+                    };
+                }
+                return null;
+            }
+            
+            updateDeviceList(devices) {
+                devices.forEach(device => {
+                    if (device.id !== this.deviceId) {
+                        this.connectedDevices.set(device.id, device);
+                    }
+                });
+                this.updateDeviceUI();
+            }
+            
+            updateDeviceUI() {
+                const deviceCount = this.connectedDevices.size;
+                const statusBar = document.querySelector('.status-bar');
+                if (statusBar) {
+                    let deviceIndicator = statusBar.querySelector('.device-indicator');
+                    if (!deviceIndicator) {
+                        deviceIndicator = document.createElement('div');
+                        deviceIndicator.className = 'device-indicator';
+                        statusBar.appendChild(deviceIndicator);
+                    }
+                    deviceIndicator.innerHTML = `🔗 ${deviceCount} device${deviceCount !== 1 ? 's' : ''} connected`;
+                    deviceIndicator.title = 'Click to see connected devices';
+                    deviceIndicator.onclick = () => this.showDeviceList();
+                }
+            }
+            
+            showDeviceList() {
+                const devices = Array.from(this.connectedDevices.values());
+                const deviceList = devices.map(device => 
+                    `📱 ${device.name} (${device.type}) - ${new Date(device.lastSeen).toLocaleTimeString()}`
+                ).join('\\n');
+                
+                alert(`Connected Devices:\\n\\n${deviceList || 'No other devices found'}`);
+            }
+            
+            startHeartbeat() {
+                // Send periodic heartbeat to maintain device list
+                setInterval(() => {
+                    this.pollForDevices();
+                }, 30000); // Every 30 seconds
+            }
+        }
+        
+        // Initialize cross-device functionality
+        window.crossDeviceManager = new CrossDeviceManager();
+        
+        // Add CSS for cross-device UI
+        const syncStyles = document.createElement('style');
+        syncStyles.textContent = `
+            .device-indicator {
+                cursor: pointer;
+                padding: 4px 8px;
+                background: rgba(74, 144, 226, 0.1);
+                border-radius: 3px;
+                font-size: 12px;
+                margin-left: 10px;
+                display: inline-block;
+            }
+            .device-indicator:hover {
+                background: rgba(74, 144, 226, 0.2);
+            }
+            .sync-notification {
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: #4CAF50;
+                color: white;
+                padding: 10px 20px;
+                border-radius: 5px;
+                z-index: 10000;
+                animation: fadeInOut 3s ease-in-out;
+            }
+            @keyframes fadeInOut {
+                0% { opacity: 0; transform: translateX(100%); }
+                20%, 80% { opacity: 1; transform: translateX(0); }
+                100% { opacity: 0; transform: translateX(100%); }
+            }
+        `;
+        document.head.appendChild(syncStyles);
+
+        function initializePWA() {
+            // Register service worker for PWA functionality
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('/static/sw.js').then(() => {
+                    console.log('Service Worker registered successfully');
+                }).catch((error) => {
+                    console.log('Service Worker registration failed:', error);
+                });
+            }
+            
+            // Handle install prompt
+            let deferredPrompt;
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredPrompt = e;
+                // Show install button if desired
+            });
+        }
+
+        function loadUserPreferences() {
+            // Load dark mode preference
+            if (localStorage.getItem('darkMode') === 'true') {
+                document.body.classList.add('dark-mode');
+            }
+            
+            // Load saved conversation
+            const saved = localStorage.getItem('buddyConversation');
+            if (saved && window.buddyGUI && typeof window.buddyGUI.loadConversation === 'function') {
+                window.buddyGUI.loadConversation();
+            }
+        }
+    </script>
+</body>
+</html>
