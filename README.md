@@ -1,4 +1,4 @@
-# 🚀 BUDDY — Your JARVIS‑style, Cross‑Device, Offline‑First Personal AI
+# 🚀 BUDDY: AN ADAPTIVE MULTI-MODAL PERSONAL AI ASSISTANT WITH CONTEXT-AWARE LEARNING AND CROSS-PLATFORM INTEGRATION
 
 A complete, privacy‑first, voice+text, multi‑device assistant that learns you, syncs across your ecosystem, and self‑optimizes.
 
